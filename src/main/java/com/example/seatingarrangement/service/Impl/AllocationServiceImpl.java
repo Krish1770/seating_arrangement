@@ -461,20 +461,64 @@ public class AllocationServiceImpl implements AllocationService {
         int copyOfValue = value;
         int comeOut = 0;
         int copyOfColumn = column;
+        int prevValueOfj=0;
+        int preOfjChecker=0;
+       int countOf1=0;
+        int firstValueInRow=0;
+
         System.out.println("changing" + column + "" + row);
 
         for (int i = row; i >= 0; i--) {
             x2Flg=0;
 
+            if(i!=row && countOf1==0) {
+                break;
+            }
+                countOf1=0;
+                if(i!=row)
+                {
+                    preOfjChecker=prevValueOfj;
+                }
+
             copyOfColumn--;
             for (int j = column; j >= 0; j--) {
-                if (dp[i + 1][j + 1] == 0) {
-                    x3Flg=1;
-                    break;
+
+
+//                   if(firstValueInRow==0 && dp[i+1][j+1]>0)
+//                   {
+//                       firstValueInRow=j;
+//                       column=firstValueInRow;
+//                   }
+                   if(firstValueInRow==0 && dp[i+1][j+1]==0)
+                   {
+                       x3Flg=1;
+                       firstValueInRow=j+1;
+                       break;
+                   }
+                    if(j==preOfjChecker  && dp[i][j+1]==0 && dp[i+1][j]==0)
+                    {
+                        if(dp[i+1][j+1]==0)
+                         break;
+                    }
+
+                    if(j<preOfjChecker && dp[i][j+1]==0 && dp[i+1][j+1]==0)
+                    {
+                        preOfjChecker=j;
+                        break;
+                    }
+                    if (dp[i + 1][j + 1] == 0) {
+                     x3Flg=1;
+                     continue;
 
                 }
 
-                copyOfValue--;
+                     countOf1++;
+//                if(dp[i+1][j+1]==0) {
+//                    x3Flg=1;
+//                    break;
+//                }
+
+                 copyOfValue--;
                 if (copyOfValue == 0) {
                     comeOut = 1;
                 }
@@ -495,10 +539,10 @@ public class AllocationServiceImpl implements AllocationService {
                 }
 
 
-
+                         prevValueOfj=j;
                 teamNames[i][j] = tempTeamList.get(key)+""+copyOfValue2;
                 copyOfValue2--;
-                System.out.println(dp[i][j]);
+                System.out.println(dp[i+1][j+1]);
 
             }
             if (comeOut == 1)
@@ -513,6 +557,8 @@ public class AllocationServiceImpl implements AllocationService {
 //        String x4=(column+1)+"_"+(row+1);
         printTeamNames(teamNames);
         calculateMidPt(x1,x2,x3,x4);
+
+        System.out.println(x1+" "+x2+" "+x3+" "+x4);
         return null;
 
     }
