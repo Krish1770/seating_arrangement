@@ -16,4 +16,8 @@ public class TeamObjectDto {
     private String companyName;
 
     private List<TeamDto> teamDtoList;
+
+    private Integer preference;
+
+    //Asc =2 Desc =1  rand=3
 }

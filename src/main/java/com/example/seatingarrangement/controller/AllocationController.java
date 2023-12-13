@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -31,14 +32,14 @@ public class AllocationController implements AllocationApi {
     @Override
     public ResponseEntity<ResponseDto> addAllocation(TeamObjectDto teamObjectDto) {
 
-        LinkedHashMap<String, Integer> toBeAllocated=new LinkedHashMap<>();
+        HashMap<String, Integer> toBeAllocated=new HashMap<>();
         System.out.println("i    "+teamObjectDto);
         for(TeamDto i:teamObjectDto.getTeamDtoList())
         {
             toBeAllocated.put(i.getTeamName(),i.getTeamCount());
         }
-        System.out.println(toBeAllocated);
-        AllocationDto allocationDto=new AllocationDto(teamObjectDto.getCompanyName(),toBeAllocated);
+        System.out.println( "toBeAllocated"+toBeAllocated);
+        AllocationDto allocationDto=new AllocationDto(teamObjectDto.getCompanyName(),toBeAllocated, teamObjectDto.getPreference());
         return allocationService.addAllocation(allocationDto);
     }
 

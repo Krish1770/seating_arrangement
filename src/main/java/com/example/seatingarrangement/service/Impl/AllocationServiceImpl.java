@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.naming.CompositeName;
+import java.lang.reflect.Array;
 import java.util.*;
 
 @Slf4j
@@ -33,15 +35,19 @@ public class AllocationServiceImpl implements AllocationService {
 
     public static int[][] arr;
 
+    public static Integer pref=0;
+
     public static int[][] dp;
 
     public static int availableSpaces=0;
 
     public static String[][] teamNames;
 
-    public static LinkedHashMap <String,Character>  tempTeamList=new LinkedHashMap<>();
+    public static LinkedHashMap <String,Character>  tempTeamList=new LinkedHashMap<>();  //ch
 
     public static ArrayList<String> midValues=new ArrayList<String>();
+
+    public static List<TeamDto> team;
 
 
     @Override
@@ -83,11 +89,19 @@ public class AllocationServiceImpl implements AllocationService {
     public   ResponseEntity<ResponseDto> addAllocation(AllocationDto allocationDto) {
         String companyName = allocationDto.getCompanyName();
 
+          pref=allocationDto.getPreference();
+
+         HashSet<TeamDto> teamDtos=new HashSet<>();
+
 
         Optional<LayOut> layOut = layOutRepoService.findByCompanyName(companyName);
+
+//        int[][] copyOfArray=new int[][];
+
+//      Optional <LayOut> layOut=(Optional)new LayOut(layOut1.get());
         LinkedHashMap<String, Character> teamList = new LinkedHashMap<>();
      int spacesTobeAllocated=0;
-        LinkedHashMap<String, Integer> map = allocationDto.getToBeAllocated();
+        HashMap<String, Integer> map = allocationDto.getToBeAllocated();  //ch
 
         System.out.println(layOut.toString());
         int row = layOut.get().getLayOut().length;
@@ -139,6 +153,10 @@ public class AllocationServiceImpl implements AllocationService {
 
 
         allocationRepository.save(allocation);
+        System.out.println(Arrays.deepToString(layOut.get().getLayOut()));
+//         layOut.get().setLayOut(copyOfArray);
+//        System.out.println("copyOfArray"+ Arrays.deepToString(copyOfArray));
+        System.out.println(Arrays.deepToString(layOut.get().getLayOut()));
 //        layOutRepository.save(layOut.get());
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto,"allocation created",HttpStatus.OK));
     }
@@ -168,7 +186,7 @@ public class AllocationServiceImpl implements AllocationService {
         arr = seatingCalculationDto.getLayOut();
 
         teamNames = new String[arr.length][arr[0].length];
-        LinkedHashMap<String, Integer> map = seatingCalculationDto.getToBeAllocated();
+        HashMap<String, Integer> map = seatingCalculationDto.getToBeAllocated();
 
         boolean[][] booleans = new boolean[arr.length][arr[0].length];
 
@@ -179,10 +197,27 @@ public class AllocationServiceImpl implements AllocationService {
             }
         }
 
-        ArrayList<Integer> al = new ArrayList<Integer>(map.values().stream().toList());
+        List<Integer> al = new ArrayList<Integer>(map.values().stream().toList());
+        System.out.println(map);
 
+        if(pref==1 || pref==2) {
+            Collections.sort(al);
 
-        Collections.sort(al);
+        }
+
+          if(pref==2)
+          {
+              Collections.reverse(al);
+
+          }
+
+          if(pref==3)
+          {
+              System.out.println(al);
+              Collections.shuffle(al);
+              System.out.println(al);
+          }
+
 
         for (int i = al.size() - 1; i >= 0; i--) {
             int lesserThanValue = 0;
@@ -631,7 +666,7 @@ public class AllocationServiceImpl implements AllocationService {
         return ans;
     }
 
-    private String getValueByKey(LinkedHashMap<String, Integer> map, Integer integer) {
+    private String getValueByKey(HashMap<String, Integer> map, Integer integer) {
 
             for(Map.Entry<String,Integer>entry:map.entrySet())
             {

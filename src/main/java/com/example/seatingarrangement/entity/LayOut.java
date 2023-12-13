@@ -29,4 +29,12 @@ public class LayOut {
     private List<TeamDto> teamDtoList;
 
     private int availableSpaces;
+
+    public LayOut(LayOut layOut) {
+        this.companyName=layOut.getCompanyName();
+        this.id=layOut.getId();
+        this.teamDtoList=layOut.getTeamDtoList();
+        this.availableSpaces= layOut.getAvailableSpaces();
+        this.teamIdList=layOut.getTeamIdList();
+    }
 }

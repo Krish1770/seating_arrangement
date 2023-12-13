@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,5 +18,5 @@ public class SeatingCalculationDto {
 
        private LinkedHashMap<String,Character> teamIdList;
 
-    private LinkedHashMap<String,Integer> toBeAllocated;
+    private HashMap<String,Integer> toBeAllocated;
 }
