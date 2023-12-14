@@ -283,7 +283,7 @@ public class AllocationServiceImpl implements AllocationService {
 //                                {
                     while (g < dp[h].length) {
 
-//                        System.out.println("inside g loop");
+//
 
                         if (dp[h][g] != 0 && dp[h][g]<=value) {
                             if (dp[h][g] == value) {
