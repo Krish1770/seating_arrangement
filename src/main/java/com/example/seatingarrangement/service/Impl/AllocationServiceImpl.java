@@ -590,10 +590,10 @@ public class AllocationServiceImpl implements AllocationService {
 //        String x2=(column-columnChange+1)+"_"+(row+1);
 //        String x3=(column+1)+"_"+(row-rowChange+1);
 //        String x4=(column+1)+"_"+(row+1);
-        printTeamNames(teamNames);
+//        printTeamNames(teamNames);
         calculateMidPt(x1,x2,x3,x4);
 
-        System.out.println(x1+" "+x2+" "+x3+" "+x4);
+//        System.out.println(x1+" "+x2+" "+x3+" "+x4);
         return null;
 
     }
@@ -619,7 +619,7 @@ public class AllocationServiceImpl implements AllocationService {
 
 
         midValues.add(finalMid);
-        System.out.println(finalMid);
+//        System.out.println(finalMid);
     }
     private static void printTeamNames(String[][] teamNames) {
         System.out.println("team names");
@@ -658,7 +658,7 @@ public class AllocationServiceImpl implements AllocationService {
                 {
                     ans[x][j]=arr[x-1][j-1];
                 }
-                System.out.print(ans[x][j] + " ");
+//                System.out.print(ans[x][j] + " ");   printing
             }
             System.out.println();
 
