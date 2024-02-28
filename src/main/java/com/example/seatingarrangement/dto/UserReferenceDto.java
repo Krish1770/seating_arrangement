@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @AllArgsConstructor
@@ -21,7 +20,7 @@ public class UserReferenceDto {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static  class  TeamReference{
+    public static class TeamReference {
         private String name;
 
         private Character Key;

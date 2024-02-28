@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 
 @Data
@@ -14,9 +13,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class SeatingCalculationDto {
 
-      private int[][] layOut;
+    private int[][] layOut;
 
-       private LinkedHashMap<String,Character> teamIdList;
+    private LinkedHashMap<String, Character> teamIdList;
 
-    private HashMap<String,Integer> toBeAllocated;
+    private HashMap<String, Integer> toBeAllocated;
 }
