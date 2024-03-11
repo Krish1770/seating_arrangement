@@ -19,4 +19,6 @@ public interface AllocationService {
     ResponseEntity<ResponseDto> getDivumLayout();
 
     ResponseEntity<ResponseDto> addTeamList(String teamName,List<TeamDto> teamDtoList);
+
+    ResponseEntity<ResponseDto> getLayOut(String companyName);
 }

@@ -43,24 +43,24 @@ public class AllocationServiceImpl implements AllocationService {
     private static void changingTrueToFalse(boolean[][] booleans, int[][] dp, int column, int row, String key, int value) {
         int rowStartingValue = -1;
         boolean rowStartingFlag = false;
-
         System.out.println(key + " " + value);
         int copyOfValue2 = value;
         String x4 = (row + 1) + "_" + (1 + column);
         String x2 = x4;
         String x1 = x4;
         String x3 = x4;
-
         int x3Flg = 0;
         int x2Flg = 0;
         int copyOfValue = value;
+        boolean isFirstValueChanges;
+        int copyOfFirstValue;
         int comeOut = 0;
-        int outFlag=0;
+        int outFlag = 0;
         int prevValueOfj = 0;
         int preOfjChecker = 0;
         int countOf1 = 0;
-//        int copyOfEachPrevCol=0;
-        int firstValueInRow = 0;
+        int firstValueInRow = -1;
+        boolean isFirstValueInRowIsSet = false;
 
         System.out.println("changing" + column + "" + row);
 
@@ -68,14 +68,11 @@ public class AllocationServiceImpl implements AllocationService {
             x2Flg = 0;
             rowStartingValue = -1;
             rowStartingFlag = false;
-
+            isFirstValueChanges = false;
             if (i != row && countOf1 == 0) {
                 break;
             }
             countOf1 = 0;
-            if (i != row) {
-                preOfjChecker = prevValueOfj;
-            }
 
 
             for (int j = column; j >= 0; j--) {
@@ -85,55 +82,36 @@ public class AllocationServiceImpl implements AllocationService {
                     rowStartingFlag = true;
                 }
 
-//                if(i==row && dp[i+1][j+1]==0)
-//                {
-//                    x2 = (i + 1) + "_" + (j + 1);
-//                    x1 = (i + 1) + "_" + (j + 1);
-//                    break;
-//                }
 
-
-                if (firstValueInRow == 0 && dp[i + 1][j + 1] == 0) {
+                if (firstValueInRow == -1 && dp[i + 1][j + 1] == 0) {
                     x3Flg = 1;
                     firstValueInRow = j + 1;
-                    if(row==i)
+                    isFirstValueInRowIsSet = true;
+
+                    if (row == i)
                         break;
-//                    continue;
                 }
 
+                if (dp[i + 1][j + 1] == 0 && j <= firstValueInRow) {
+                    if (j == firstValueInRow) {
+                        firstValueInRow = j + 1;
+                        isFirstValueChanges = true;
+//                        isFirstValueInRowIsSet = true;
+                        break;
+                    } else if (j < firstValueInRow) {
+                        firstValueInRow = j + 1;
+                        isFirstValueChanges = true;
+                        isFirstValueInRowIsSet = true;
+                        break;
+                    }
 
-//                && dp[i][j+1]==0
-//                if(firstValueInRow!=0 && j<=firstValueInRow )
-//                {
-//                    rowStartingValue=j+1;
-//                    break;
-//                }
-                if(dp[i+1][j+1]==0 && dp[i+2][j]==0 && j<=firstValueInRow )
-                {
-                    rowStartingValue=j+1;
-                    break;
                 }
-
-
-
-//                if (j == preOfjChecker && dp[i][j + 1] == 0 && dp[i + 1][j] == 0) {
-//                    if (dp[i + 1][j + 1] == 0) break;
-//                }
-//
-//                if (j < preOfjChecker && dp[i][j + 1] == 0 && dp[i + 1][j + 1] == 0) {
-//                    preOfjChecker = j;
-//                    break;
-//                }
                 if (dp[i + 1][j + 1] == 0) {
                     x3Flg = 1;
                     continue;
                 }
-
                 countOf1++;
-//                if(dp[i+1][j+1]==0) {
-//                    x3Flg=1;
-//                    break;
-//                }
+
 
                 copyOfValue--;
                 if (copyOfValue == 0) {
@@ -157,18 +135,29 @@ public class AllocationServiceImpl implements AllocationService {
 
                 prevValueOfj = j;
                 teamNames[i][j] = tempTeamList.get(key) + "" + copyOfValue2;
+                firstValueInRow = j;
                 copyOfValue2--;
                 System.out.println(dp[i + 1][j + 1]);
 
-                {
-
-                }
             }
             column = rowStartingValue;
             rowStartingFlag = false;
+
+            if (firstValueInRow == -1) {
+                firstValueInRow = 0;
+//                isFirstValueInRowIsSet = true;
+//                isFirstValueChanges = true;
+            }
+//            if (!isFirstValueChanges) {
+//                firstValueInRow = 0;
+//                isFirstValueInRowIsSet = true;
+//            }
+
+
             if (comeOut == 1) break;
 
         }
+
 
         printTeamNames(teamNames);
         calculateMidPt(x1, x2, x3, x4);
@@ -265,9 +254,10 @@ public class AllocationServiceImpl implements AllocationService {
         layOutRepoService.insert(layout);
         log.info(layout.toString());
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "layout saved", HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(layout.getLayOut(), "layout saved", HttpStatus.OK));
 
     }
+
     @Override
     public ResponseEntity<ResponseDto> addAllocation(AllocationDto allocationDto) {
         String companyName = allocationDto.getCompanyName();
@@ -488,6 +478,16 @@ public class AllocationServiceImpl implements AllocationService {
         return null;
     }
 
+    @Override
+    public ResponseEntity<ResponseDto> getLayOut(String companyName) {
+        Optional<LayOut> layOut = layOutRepository.findByCompanyName(companyName);
+        if (layOut.isPresent())
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(layOut.get().getLayOut(), "layout obtained", HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "Company not found", HttpStatus.OK));
+
+    }
+
+
     private int[][] DpCalculation(int[][] arr) {
 
         int[][] ans = new int[arr.length + 1][arr[0].length + 1];
@@ -515,6 +515,20 @@ public class AllocationServiceImpl implements AllocationService {
 
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             if (entry.getValue().equals(integer)) return entry.getKey();
+        }
+        String order="abcd";
+        String s = "cbag";
+        LinkedHashMap<String,Integer>map=new LinkedHashMap<String,String>();
+        String ans="";
+        for(int i=0;i<order.length();i++)
+        {
+            map.put(order.charAt(i)+"","");
+        }
+        String copy="";
+        for(int i=0;i<s.length();i++)
+        {
+            copy+=s;
+            map.replace(s.charAt(i)+"",s.length()-copy.replaceAll(s.charAt(i)+"","").length());
         }
         return null;
     }

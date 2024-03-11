@@ -21,6 +21,7 @@ public class AllocationController implements AllocationApi {
     private AllocationService allocationService;
     @Override
     public ResponseEntity<ResponseDto> add(LayoutDto layoutDto) {
+        System.out.println("hi");
         return allocationService.add(layoutDto);
     }
 
@@ -46,6 +47,11 @@ public class AllocationController implements AllocationApi {
     @Override
     public ResponseEntity<ResponseDto> getDivumLayOut() {
         return allocationService.getDivumLayout();
+    }
+
+    @Override
+    public ResponseEntity<ResponseDto> getLayOut(String companyName) {
+        return allocationService.getLayOut(companyName);
     }
 
 

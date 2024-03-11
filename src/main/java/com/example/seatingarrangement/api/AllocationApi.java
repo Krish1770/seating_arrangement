@@ -23,4 +23,7 @@ public interface AllocationApi {
 
     @GetMapping("Divum-layout")
     ResponseEntity<ResponseDto> getDivumLayOut();
+
+    @GetMapping("/layout/{companyName}")
+    ResponseEntity<ResponseDto> getLayOut(@PathVariable String companyName);
 }
