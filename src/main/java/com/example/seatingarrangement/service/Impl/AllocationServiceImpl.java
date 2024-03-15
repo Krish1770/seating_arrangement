@@ -29,8 +29,8 @@ public class AllocationServiceImpl implements AllocationService {
 
     public static List<UserReferenceDto.TeamReference> tempTeamList2 = new ArrayList<>();
     public static LinkedHashMap<String, Character> tempTeamList1 = new LinkedHashMap<>();
-    public static ArrayList<String> midValues = new ArrayList<String>();
-    public static List<TeamDto> team;
+    public static ArrayList<String> midValues = new ArrayList<>();
+//    public static List<TeamDto> team;
     @Autowired
     private AllocationRepository allocationRepository;
     @Autowired
@@ -153,11 +153,8 @@ public class AllocationServiceImpl implements AllocationService {
 //                isFirstValueInRowIsSet = true;
 //            }
 
-
             if (comeOut == 1) break;
-
         }
-
 
         printTeamNames(teamNames);
         calculateMidPt(x1, x2, x3, x4);
@@ -225,10 +222,8 @@ public class AllocationServiceImpl implements AllocationService {
 
     private static String FindAvgMidOfTheCluster() {
         String avgMid = "";
-
         Double xPart = 0D;
         Double yPart = 0D;
-
         int count = 0;
         for (String string : midValues) {
             String arr[] = string.split("_");
@@ -237,7 +232,6 @@ public class AllocationServiceImpl implements AllocationService {
             count++;
         }
         avgMid = (xPart / count) + "_" + (yPart / count);
-
         return avgMid;
     }
 
@@ -330,15 +324,11 @@ public class AllocationServiceImpl implements AllocationService {
 
         List<Integer> al = new ArrayList<Integer>(map.values().stream().toList());
         System.out.println(map);
-
         if (pref == 1 || pref == 2) {
             Collections.sort(al);
-
         }
-
         if (pref == 2) {
             Collections.reverse(al);
-
         }
 
         if (pref == 3) {
@@ -401,8 +391,6 @@ public class AllocationServiceImpl implements AllocationService {
                                     if (firstIncomingFlag == 1) {
                                         String nearValue = nearCluster(temph + "_" + tempg, h + "_" + g);
 
-
-//
                                         String[] tempArray = nearValue.split("_");
 
                                         temph = Integer.parseInt(tempArray[0]);
@@ -482,18 +470,15 @@ public class AllocationServiceImpl implements AllocationService {
     public ResponseEntity<ResponseDto> getLayOut(String companyName) {
         Optional<LayOut> layOut = layOutRepository.findByCompanyName(companyName);
         if (layOut.isPresent())
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(layOut.get().getLayOut(), "layout obtained", HttpStatus.OK));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(layOut.get(), "layout obtained", HttpStatus.OK));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "Company not found", HttpStatus.OK));
-
     }
-
 
     private int[][] DpCalculation(int[][] arr) {
 
         int[][] ans = new int[arr.length + 1][arr[0].length + 1];
         for (int x = 1; x < arr.length + 1; x++) {
             for (int j = 1; j < arr[0].length + 1; j++) {
-
                 if ((arr[x - 1][j - 1] == 1) && ans[x][j - 1] != 0 && ans[x - 1][j] != 0) {
                     ans[x][j] = ans[x - 1][j] + ans[x][j - 1] - ans[x - 1][j - 1] + arr[x - 1][j - 1];
                 } else if ((arr[x - 1][j - 1] == 1) && ans[x][j - 1] != 0) {
@@ -506,7 +491,6 @@ public class AllocationServiceImpl implements AllocationService {
                 System.out.print(ans[x][j] + " ");
             }
             System.out.println();
-
         }
         return ans;
     }
@@ -516,20 +500,7 @@ public class AllocationServiceImpl implements AllocationService {
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             if (entry.getValue().equals(integer)) return entry.getKey();
         }
-        String order="abcd";
-        String s = "cbag";
-        LinkedHashMap<String,Integer>map=new LinkedHashMap<String,String>();
-        String ans="";
-        for(int i=0;i<order.length();i++)
-        {
-            map.put(order.charAt(i)+"","");
-        }
-        String copy="";
-        for(int i=0;i<s.length();i++)
-        {
-            copy+=s;
-            map.replace(s.charAt(i)+"",s.length()-copy.replaceAll(s.charAt(i)+"","").length());
-        }
+
         return null;
     }
 }
