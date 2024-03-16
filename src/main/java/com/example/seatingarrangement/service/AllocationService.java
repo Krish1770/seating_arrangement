@@ -1,13 +1,12 @@
 package com.example.seatingarrangement.service;
 
 
-import com.example.seatingarrangement.dto.AllocationDto;
-import com.example.seatingarrangement.dto.LayoutDto;
-import com.example.seatingarrangement.dto.ResponseDto;
-import com.example.seatingarrangement.dto.TeamDto;
+import com.example.seatingarrangement.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @Service
@@ -21,4 +20,6 @@ public interface AllocationService {
     ResponseEntity<ResponseDto> addTeamList(String teamName,List<TeamDto> teamDtoList);
 
     ResponseEntity<ResponseDto> getLayOut(String companyName);
+
+    CsvOutputDto convertCsvFile(InputStream inputStream) throws IOException;
 }
