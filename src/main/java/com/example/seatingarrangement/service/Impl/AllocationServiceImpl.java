@@ -28,14 +28,14 @@ public class AllocationServiceImpl implements AllocationService {
     public static int[][] arr;
     public static Integer pref = 0;
     public static int[][] dp;
-    public static int availableSpaces = 0;
-    public static String[][] teamNames;
+    public static  int availableSpaces = 0;
+    public static  String[][] teamNames;
     public static LinkedHashMap<String, Character> tempTeamList = new LinkedHashMap<>();  //ch
 
     public static List<UserReferenceDto.TeamReference> tempTeamList2 = new ArrayList<>();
     public static LinkedHashMap<String, Character> tempTeamList1 = new LinkedHashMap<>();
     public static ArrayList<String> midValues = new ArrayList<>();
-//    public static List<TeamDto> team;
+    //    public static List<TeamDto> team;
     @Autowired
     private AllocationRepository allocationRepository;
     @Autowired
@@ -57,15 +57,12 @@ public class AllocationServiceImpl implements AllocationService {
         int x3Flg = 0;
         int x2Flg = 0;
         int copyOfValue = value;
-        boolean isFirstValueChanges;
-        int copyOfFirstValue;
+
         int comeOut = 0;
-        int outFlag = 0;
-        int prevValueOfj = 0;
-        int preOfjChecker = 0;
+
         int countOf1 = 0;
         int firstValueInRow = -1;
-        boolean isFirstValueInRowIsSet = false;
+
 
         System.out.println("changing" + column + "" + row);
 
@@ -73,7 +70,6 @@ public class AllocationServiceImpl implements AllocationService {
             x2Flg = 0;
             rowStartingValue = -1;
             rowStartingFlag = false;
-            isFirstValueChanges = false;
             if (i != row && countOf1 == 0) {
                 break;
             }
@@ -91,24 +87,21 @@ public class AllocationServiceImpl implements AllocationService {
                 if (firstValueInRow == -1 && dp[i + 1][j + 1] == 0) {
                     x3Flg = 1;
                     firstValueInRow = j + 1;
-                    isFirstValueInRowIsSet = true;
+
 
                     if (row == i)
                         break;
                 }
 
                 if (dp[i + 1][j + 1] == 0 && j <= firstValueInRow) {
-                    if (j == firstValueInRow) {
+//                    if (j == firstValueInRow) {
                         firstValueInRow = j + 1;
-                        isFirstValueChanges = true;
-//                        isFirstValueInRowIsSet = true;
                         break;
-                    } else if (j < firstValueInRow) {
-                        firstValueInRow = j + 1;
-                        isFirstValueChanges = true;
-                        isFirstValueInRowIsSet = true;
-                        break;
-                    }
+//                    } else if (j < firstValueInRow) {
+//                        firstValueInRow = j + 1;
+//
+//                        break;
+//                    }
 
                 }
                 if (dp[i + 1][j + 1] == 0) {
@@ -138,7 +131,7 @@ public class AllocationServiceImpl implements AllocationService {
                     x2Flg = 1;
                 }
 
-                prevValueOfj = j;
+
                 teamNames[i][j] = tempTeamList.get(key) + "" + copyOfValue2;
                 firstValueInRow = j;
                 copyOfValue2--;
@@ -146,17 +139,11 @@ public class AllocationServiceImpl implements AllocationService {
 
             }
             column = rowStartingValue;
-            rowStartingFlag = false;
 
             if (firstValueInRow == -1) {
                 firstValueInRow = 0;
-//                isFirstValueInRowIsSet = true;
-//                isFirstValueChanges = true;
+
             }
-//            if (!isFirstValueChanges) {
-//                firstValueInRow = 0;
-//                isFirstValueInRowIsSet = true;
-//            }
 
             if (comeOut == 1) break;
         }
@@ -182,7 +169,7 @@ public class AllocationServiceImpl implements AllocationService {
         String[] ArrayX5 = midPointfx1Andx2.split("_");
         String[] ArrayX6 = midPointfx3Andx4.split("_");
 
-        String finalMid = (((Double.parseDouble(ArrayX5[0]) + Double.parseDouble((ArrayX6[0])))) / 2) + "_" + ((Double.parseDouble(ArrayX5[1]) + Double.parseDouble(ArrayX6[1])) / 2);
+        String finalMid = ((Double.parseDouble(ArrayX5[0]) + Double.parseDouble((ArrayX6[0]))) / 2) + "_" + ((Double.parseDouble(ArrayX5[1]) + Double.parseDouble(ArrayX6[1])) / 2);
 
 
         midValues.add(finalMid);
@@ -311,7 +298,7 @@ public class AllocationServiceImpl implements AllocationService {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, "allocation created", HttpStatus.OK));
     }
 
-    private void seatingCalculation(SeatingCalculationDto seatingCalculationDto) {
+    private  void seatingCalculation(SeatingCalculationDto seatingCalculationDto) {
 
         arr = seatingCalculationDto.getLayOut();
 
@@ -354,14 +341,14 @@ public class AllocationServiceImpl implements AllocationService {
             UserReferenceDto.TeamReference teamReference = new UserReferenceDto.TeamReference(key, tempTeamList.get(key));
             tempTeamList2.add(teamReference);
 
-            dp = DpCalculation(arr);
+            dp = dpCalculation(arr);
 
             ArrayList<String> arrayList = new ArrayList<String>();
 
             while (al.get(i) > 0) {
                 int m = 0;
                 int firstIncomingFlag = 0;
-                dp = DpCalculation(arr);
+                dp = dpCalculation(arr);
 
                 int value = al.get(i);
                 int h = 1;
@@ -479,7 +466,7 @@ public class AllocationServiceImpl implements AllocationService {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "Company not found", HttpStatus.OK));
     }
 
-    private int[][] DpCalculation(int[][] arr) {
+    private  int[][] dpCalculation(int[][] arr) {
 
         int[][] ans = new int[arr.length + 1][arr[0].length + 1];
         for (int x = 1; x < arr.length + 1; x++) {
@@ -502,9 +489,9 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Override
     public CsvOutputDto convertCsvFile(InputStream inputStream) throws IOException {
-        CsvOutputDto csvOutputDto=new CsvOutputDto();
+        CsvOutputDto csvOutputDto = new CsvOutputDto();
 
-        Integer spacesOccupied=0;
+        Integer spacesOccupied = 0;
         List<TeamDto> teamDtoList = new ArrayList<>();
         XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         XSSFSheet sheet = workbook.getSheet("Sheet1");
@@ -551,7 +538,6 @@ public class AllocationServiceImpl implements AllocationService {
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             if (entry.getValue().equals(integer)) return entry.getKey();
         }
-
         return null;
     }
 }
