@@ -14,6 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 public class CsvOutputDto {
     private List<TeamDto> teamDtoList;
-
+    private boolean flag;
     private Integer spacesOccupied;
 }

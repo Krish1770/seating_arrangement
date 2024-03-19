@@ -15,10 +15,6 @@ public interface AllocationService {
 
     ResponseEntity<ResponseDto> addAllocation(AllocationDto allocationDto);
 
-    ResponseEntity<ResponseDto> getDivumLayout();
-
-    ResponseEntity<ResponseDto> addTeamList(String teamName,List<TeamDto> teamDtoList);
-
     ResponseEntity<ResponseDto> getLayOut(String companyName);
 
     CsvOutputDto convertCsvFile(InputStream inputStream) throws IOException;

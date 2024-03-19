@@ -28,12 +28,6 @@ public class AllocationController implements AllocationApi {
         System.out.println("hi");
         return allocationService.add(layoutDto);
     }
-
-    @Override
-    public ResponseEntity<ResponseDto> addTeamList( String teamName,List<TeamDto> teamDtoList) {
-        return allocationService.addTeamList(teamName,teamDtoList);
-    }
-
     @Override
     public ResponseEntity<ResponseDto> addAllocation(TeamObjectDto teamObjectDto) {
 
@@ -47,12 +41,6 @@ public class AllocationController implements AllocationApi {
         AllocationDto allocationDto=new AllocationDto(teamObjectDto.getCompanyName(),toBeAllocated, teamObjectDto.getPreference());
         return allocationService.addAllocation(allocationDto);
     }
-
-    @Override
-    public ResponseEntity<ResponseDto> getDivumLayOut() {
-        return allocationService.getDivumLayout();
-    }
-
     @Override
     public ResponseEntity<ResponseDto> getLayOut(String companyName) {
         return allocationService.getLayOut(companyName);
@@ -62,10 +50,10 @@ public class AllocationController implements AllocationApi {
     public ResponseEntity<ResponseDto> convertCsvFile(MultipartFile file) throws IOException {
         System.out.println(file);
         InputStream inputStream=file.getInputStream();
-
         CsvOutputDto csvOutputDto=allocationService.convertCsvFile(inputStream);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(csvOutputDto,"file converted",HttpStatus.OK));
-
+        if(csvOutputDto.isFlag())
+         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(csvOutputDto,"file converted",HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("","file not converted",HttpStatus.OK));
 
     }
 
