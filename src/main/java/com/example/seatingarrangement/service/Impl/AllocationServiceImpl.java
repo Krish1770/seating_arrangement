@@ -1,17 +1,18 @@
 package com.example.seatingarrangement.service.Impl;
 
 import com.example.seatingarrangement.dto.*;
-import com.example.seatingarrangement.entity.Allocation;
-import com.example.seatingarrangement.entity.LayOut;
+import com.example.seatingarrangement.entity.*;
 import com.example.seatingarrangement.repository.AllocationRepository;
-import com.example.seatingarrangement.repository.LayOutRepository;
+import com.example.seatingarrangement.repository.CompanyRepository;
 import com.example.seatingarrangement.repository.Service.AllocationRepoService;
-import com.example.seatingarrangement.repository.Service.LayOutRepoService;
+import com.example.seatingarrangement.repository.Service.CompanyRepoService;
+import com.example.seatingarrangement.repository.TeamRepository;
 import com.example.seatingarrangement.service.AllocationService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,13 +39,20 @@ public class AllocationServiceImpl implements AllocationService {
     @Autowired
     private AllocationRepoService allocationRepoService;
     @Autowired
-    private LayOutRepository layOutRepository;
+    private CompanyRepository companyRepository;
+
     @Autowired
-    private LayOutRepoService layOutRepoService;
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private CompanyRepoService companyRepoService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     private static void changingTrueToFalse(boolean[][] booleans, int[][] dp, int column, int row, String key, int value) {
-        int rowStartingValue ;
-        boolean rowStartingFlag ;
+        int rowStartingValue;
+        boolean rowStartingFlag;
         System.out.println(key + " " + value);
         int copyOfValue2 = value;
         String x4 = (row + 1) + "_" + (1 + column);
@@ -52,12 +60,12 @@ public class AllocationServiceImpl implements AllocationService {
         String x1 = x4;
         String x3 = x4;
         int x3Flg = 0;
-        int x2Flg ;
+        int x2Flg;
         int copyOfValue = value;
         int comeOut = 0;
         int countOf1 = 0;
         int firstValueInRow = -1;
-        System.out.println("changing" + column +  row);
+        System.out.println("changing" + column + row);
         for (int i = row; i >= 0; i--) {
             x2Flg = 0;
             rowStartingValue = -1;
@@ -162,7 +170,7 @@ public class AllocationServiceImpl implements AllocationService {
     }
 
     private static String FindAvgMidOfTheCluster() {
-        String avgMid ;
+        String avgMid;
         double xPart = 0D;
         double yPart = 0D;
         int count = 0;
@@ -178,49 +186,124 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Override
     public ResponseEntity<ResponseDto> add(LayoutDto layoutDto) {
-        log.info(layoutDto.toString());
-        LayOut layout = new LayOut();
-        layout.setCompanyName(layoutDto.getCompanyName());
-        layout.setLayOut(layoutDto.getLayOut());
-        layout.setTeamIdList(new LinkedHashMap<>());
-        availableSpaces = availableSpacesCount(layout.getLayOut());
-        layout.setAvailableSpaces(availableSpaces);
-        layOutRepoService.insert(layout);
-        log.info(layout.toString());
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(layout.getLayOut(), "layout saved", HttpStatus.OK));
+        Optional<Company> company=companyRepository.findById(layoutDto.getCompanyId());
+        LayoutDto responseLayoutDto=new LayoutDto();
+//        if(company.isEmpty())
+//            throw new BadRequestException("company not present");
+//        if(layoutDto.getLayoutId()==null&&layoutDto.getDefaultLayout()==null)
+//            throw new BadRequestException("data not present");
+         if(layoutDto.getLayoutId()==null){
+            Company.DefaultLayout defaultLayout=new Company.DefaultLayout();
+            defaultLayout.setCompanylayout(layoutDto.getDefaultLayout());
+            defaultLayout.setLayoutId(UUID.randomUUID().toString());
+            defaultLayout.setTotalSpace(findTotalSpace(layoutDto.getDefaultLayout()));
+            modelMapper.map(defaultLayout,responseLayoutDto);
+            company.get().getCompanyLayout().add(defaultLayout);
+//            companyRepository.save(company.get());
+        } else if (layoutDto.getDefaultLayout()==null) {
+            int ind=0;
+            for (Company.DefaultLayout defaultLayout:company.get().getCompanyLayout()){
+                if(defaultLayout.getLayoutId().equals(layoutDto.getLayoutId())){
+                    company.get().getCompanyLayout().remove(ind);
+                    break;
+                }
+                ind++;
+            }
+            System.out.println(company.get().getCompanyLayout());
+            company.get().setCompanyLayout(company.get().getCompanyLayout());
+//            companyRepository.save(company.get());
+        }
+        else{
+            int ind=0;
+            for (Company.DefaultLayout defaultLayout:company.get().getCompanyLayout()){
+                if(defaultLayout.getLayoutId().equals(layoutDto.getLayoutId())){
+                    defaultLayout.setCompanyLayout(layoutDto.getDefaultLayout());
+                    defaultLayout.setTotalSpace(availableSpacesCount(layoutDto.getLayOut()));
+                    company.get().getCompanyLayout().set(ind,defaultLayout);
+                    modelMapper.map(defaultLayout,responseLayoutDto);
+                    break;
+                }
+                ind++;
+            }
+//            companyRepository.save(company.get());
+        }
+        responseLayoutDto.setCompanyId(layoutDto.getCompanyId());
+        companyRepository.save(company.get());
+//        return responseLayoutDto;
+
+//        log.info(layoutDto.toString());
+//        Company company = new Company();
+//        company.setCompanyName(layoutDto.getCompanyName());
+//        layout.setLayOut(layoutDto.getLayOut());
+//        layout.setTeamIdList(new LinkedHashMap<>());
+//        availableSpaces = availableSpacesCount(layout.getLayOut());
+//        layout.setAvailableSpaces(availableSpaces);
+//        companyRepoService.insert(layout);
+//        log.info(layout.toString());
+//        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(layout.getLayOut(), "layout saved", HttpStatus.OK));
+    return null;
     }
 
     @Override
     public ResponseEntity<ResponseDto> addAllocation(AllocationDto allocationDto) {
-        String companyName = allocationDto.getCompanyName();
+        String layoutId = allocationDto.getLayoutId();
         pref = allocationDto.getPreference();
-        Optional<LayOut> layOut = layOutRepoService.findByCompanyName(companyName);
+        GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(layoutId);
         LinkedHashMap<String, Character> teamList = new LinkedHashMap<>();
         int spacesTobeAllocated = 0;
         HashMap<String, Integer> map = allocationDto.getToBeAllocated();  //ch
-        System.out.println(layOut.toString());
+        System.out.println(getLayoutDto.toString());
         for (int i : map.values()) {
             spacesTobeAllocated += i;
         }
-        availableSpaces = layOut.get().getAvailableSpaces();
+        availableSpaces = getLayoutDto.getAvailableSpaces();
         System.out.println(spacesTobeAllocated + " " + availableSpaces);
         if (availableSpaces < spacesTobeAllocated)
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "members exceeds the spaces", HttpStatus.OK));
+        List<TeamInfo> teamInfos = new ArrayList<>();
+        TeamInfo teamInfo = new TeamInfo();
+        LinkedHashMap<String, Character> tempList = new LinkedHashMap<>();
         for (String name : map.keySet()) {
-            if (layOut.get().getTeamIdList().isEmpty()) {
-                layOut.get().getTeamIdList().put(name, 'A');
+            if (tempList.isEmpty()) {
+                tempList.put(name, 'A');
+                teamInfo.setTeamCode("A");
+
             } else {
-                teamList = layOut.get().getTeamIdList();
+                teamList = tempList;
                 char lastId = teamList.values().stream().toList().get(teamList.size() - 1);
                 ++lastId;
-                layOut.get().getTeamIdList().put(name, lastId);
+                tempList.put(name, lastId);
+                teamInfo.setTeamCode("" + lastId);
             }
+            teamInfo.setTeamName(name);
+            teamInfo.setTeamCount(map.get(name));
+            teamInfos.add(teamInfo);
+
+
         }
-        tempTeamList = layOut.get().getTeamIdList();
-        SeatingCalculationDto seatingCalculationDto = new SeatingCalculationDto(layOut.get().getLayOut(), teamList, map);
+        tempTeamList = tempList;
+        SeatingCalculationDto seatingCalculationDto = new SeatingCalculationDto(getLayoutDto.getLayout(), teamList, map);
         seatingCalculation(seatingCalculationDto);
-        log.info(layOut.get().getTeamIdList().toString());
-        Allocation allocation = new Allocation(layOut.get().getId(), layOut.get().getCompanyName(), teamNames);
+        log.info(tempList.toString());
+        Allocation allocation = new Allocation();
+        allocation.setDefaultLayoutId(layoutId);
+
+        if (pref == 1)
+            allocation.setAllocationType(Type.ASC);
+        else if (pref == 2)
+            allocation.setAllocationType(Type.DESC);
+        else
+            allocation.setAllocationType(Type.RANDOM);
+
+        allocation.setAllocationLayout(teamNames);
+
+        Team team = new Team();
+        team.setTeams(teamInfos);
+        team.setLayoutId(layoutId);
+        teamRepository.save(team);
+
+
+//        Allocation allocation = new Allocation(layOut.get().getId(), layOut.get().getCompanyName(), teamNames);
         UserReferenceDto userReferenceDto = new UserReferenceDto(teamNames, tempTeamList2);
         allocationRepository.save(allocation);
         System.out.println("teamList" + tempTeamList1);
@@ -261,7 +344,7 @@ public class AllocationServiceImpl implements AllocationService {
                 dp = dpCalculation(arr);
                 int value = al.get(i);
                 int h = 1;
-                int g ;
+                int g;
                 int tempg = 0;
                 int temph = 0;
                 while (h < dp.length) {
@@ -335,8 +418,8 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Override
     public ResponseEntity<ResponseDto> getLayOut(String companyName) {
-        Optional<LayOut> layOut = layOutRepository.findByCompanyName(companyName);
-        return layOut.map(out -> ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(out, "layout obtained", HttpStatus.OK))).orElseGet(() -> ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "Company not found", HttpStatus.OK)));
+        Optional<Company> company = companyRepository.findByCompanyName(companyName);
+        return company.map(out -> ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(out, "layout obtained", HttpStatus.OK))).orElseGet(() -> ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("", "Company not found", HttpStatus.OK)));
     }
 
     private int[][] dpCalculation(int[][] arr) {
@@ -361,7 +444,7 @@ public class AllocationServiceImpl implements AllocationService {
     public CsvOutputDto convertCsvFile(InputStream inputStream) throws IOException {
         CsvOutputDto csvOutputDto = new CsvOutputDto();
         Integer spacesOccupied = 0;
-        boolean flag=true;
+        boolean flag = true;
         List<TeamDto> teamDtoList = new ArrayList<>();
         XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         XSSFSheet sheet = workbook.getSheet("Sheet1");
@@ -372,14 +455,14 @@ public class AllocationServiceImpl implements AllocationService {
             else {
                 TeamDto teamDto = new TeamDto();
                 for (int i = 0; i < noOfColumns; i++) {
-                    if (row.getCell(i) != null  ) {
+                    if (row.getCell(i) != null) {
                         if (i == 0) teamDto.setTeamName(row.getCell(i).toString());
                         else {
                             teamDto.setTeamCount(Integer.valueOf(String.valueOf(row.getCell(i)).split("\\.")[0]));
                             spacesOccupied += teamDto.getTeamCount();
                         }
                     } else {
-                        flag=false;
+                        flag = false;
                         break;
                     }
                 }

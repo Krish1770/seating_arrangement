@@ -1,8 +1,10 @@
 package com.example.seatingarrangement.entity;
 
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,9 +16,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Allocation {
 
     @Id
-    private String id;
-    private String companyName;
-    private String[][] allocation;
+    @UuidGenerator
+    private String allocationId;
+//    private String companyName;
+     private String defaultLayoutId;
+   private String teamId;
+
+   @Enumerated
+   private Type allocationType;
+   private String[][] allocationLayout;
 }
 
 //{

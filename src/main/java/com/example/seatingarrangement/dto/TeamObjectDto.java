@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class TeamObjectDto {
 
-    private String companyName;
+    private String LayoutId;
 
     private List<TeamDto> teamDtoList;
 

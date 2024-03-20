@@ -14,7 +14,7 @@ import java.util.Map;
 @Data
 public class AllocationDto {
 
-    private String companyName;
+    private String LayoutId;
 
 //    private LinkedHashMap<String,Integer> toBeAllocated;
 private HashMap<String,Integer> toBeAllocated;
