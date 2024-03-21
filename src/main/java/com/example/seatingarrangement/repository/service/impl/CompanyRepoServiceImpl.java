@@ -1,9 +1,9 @@
-package com.example.seatingarrangement.repository.Service.Impl;
+package com.example.seatingarrangement.repository.service.impl;
 
 import com.example.seatingarrangement.dto.GetLayoutDto;
 import com.example.seatingarrangement.entity.Company;
 import com.example.seatingarrangement.repository.CompanyRepository;
-import com.example.seatingarrangement.repository.Service.CompanyRepoService;
+import com.example.seatingarrangement.repository.service.CompanyRepoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,23 +1,16 @@
 package com.example.seatingarrangement.dto;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+//@Getter
+//@Setter
 public class LayoutDto {
-
-    private String companyName;
-
     private String layoutId;
+    private String companyName;
+    private int[][] defaultLayout;
 
-//    private int row;
-//    private int column;
 
-    private List<int[][]> layOut;
 }

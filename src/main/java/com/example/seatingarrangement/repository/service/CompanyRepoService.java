@@ -1,4 +1,4 @@
-package com.example.seatingarrangement.repository.Service;
+package com.example.seatingarrangement.repository.service;
 
 
 import com.example.seatingarrangement.dto.GetLayoutDto;

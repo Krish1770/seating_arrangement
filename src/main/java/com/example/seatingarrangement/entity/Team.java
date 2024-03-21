@@ -14,8 +14,6 @@ import java.util.List;
 @Data
 public class Team {
 
-    @Id
-    @UuidGenerator
     private String teamId;
 
     private String layoutId;

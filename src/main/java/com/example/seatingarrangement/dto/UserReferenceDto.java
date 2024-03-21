@@ -5,15 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class UserReferenceDto {
     private String[][] allocation;
-
-//    private LinkedHashMap<String,Character> teamIds;
 
     private List<TeamReference> teamReferenceList;
 
@@ -24,6 +22,8 @@ public class UserReferenceDto {
     public static  class  TeamReference{
         private String name;
 
-        private Character Key;
+        private String Key;
+
+        private Integer count;
     }
 }

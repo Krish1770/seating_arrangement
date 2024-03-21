@@ -12,11 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class TeamObjectDto {
+public class  TeamObjectDto {
 
-    private String LayoutId;
+    private String layoutId;
 
     private List<TeamDto> teamDtoList;
+
+    private Integer algorithmPref;
 
     private Integer preference;
 }

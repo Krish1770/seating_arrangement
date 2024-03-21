@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Document(collection = "seating_allocation")
+@Document(collection = "Allocation")
 public class Allocation {
 
     @Id
