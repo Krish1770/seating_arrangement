@@ -47,10 +47,6 @@ public class AllocationServiceImpl implements AllocationService {
     private ModelMapper modelMapper;
 
 
-
-
-
-
     @Override
     public ResponseEntity<ResponseDto> add(CompanyDto companyDto) throws BadRequestException {
         Company company = new Company();
@@ -66,29 +62,24 @@ public class AllocationServiceImpl implements AllocationService {
             defaultLayoutList.add(defaultLayout);
         }
         company.setCompanyLayout(defaultLayoutList);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(companyRepository.save(company),"company saved",HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(companyRepository.save(company), "company saved", HttpStatus.OK));
     }
 
     @Override
     public ResponseEntity<ResponseDto> addAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
-        AllocationAbstract allocationAbstract;
-          if(teamObjectDto.getAlgorithmPref()==1)
-          {
-              GreedyImpl greedyImpl=new GreedyImpl(teamRepoService,companyRepoService,teamRepository,allocationRepoService,allocationRepository,modelMapper);
+        if (teamObjectDto.getAlgorithmPref() == 1) {
+            GreedyImpl greedyImpl = new GreedyImpl(teamRepoService, companyRepoService, teamRepository, allocationRepoService, allocationRepository, modelMapper);
 
-              System.out.println("h       i          "+companyRepository.findByLayoutId(teamObjectDto.getLayoutId()));
+            System.out.println("h       i          " + companyRepository.findByLayoutId(teamObjectDto.getLayoutId()));
             return greedyImpl.createAllocation(teamObjectDto);
 
-          }
-          else if(teamObjectDto.getAlgorithmPref()==2)
-          {
-              BacktrackingImpl backtracking=new BacktrackingImpl(teamRepoService,companyRepoService,teamRepository,allocationRepoService,allocationRepository,modelMapper);
+        } else if (teamObjectDto.getAlgorithmPref() == 2) {
+            BacktrackingImpl backtracking = new BacktrackingImpl(teamRepoService, companyRepoService, teamRepository, allocationRepoService, allocationRepository, modelMapper);
 
-              System.out.println("BTTTTTTTTTT");
-           return   backtracking.createAllocation(teamObjectDto);
-          }
+            return backtracking.createAllocation(teamObjectDto);
+        }
 
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("","incorrect choice",HttpStatus.BAD_REQUEST));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("", "incorrect choice", HttpStatus.BAD_REQUEST));
     }
 
     private int availableSpacesCount(int[][] layOut) {
@@ -148,34 +139,33 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Override
     public ResponseEntity<ResponseDto> updateLayout(LayoutDto layoutDto) throws BadRequestException {
-        LayoutDto responseLayoutDto=new LayoutDto();
-        Company company=isValid(layoutDto);
-        if(layoutDto.getLayoutId()==null){
-            Company.DefaultLayout defaultLayout=new Company.DefaultLayout();
+        LayoutDto responseLayoutDto = new LayoutDto();
+        Company company = isValid(layoutDto);
+        if (layoutDto.getLayoutId() == null) {
+            Company.DefaultLayout defaultLayout = new Company.DefaultLayout();
             defaultLayout.setCompanyLayout(layoutDto.getDefaultLayout());
             defaultLayout.setLayoutId(UUID.randomUUID().toString());
             defaultLayout.setTotalSpace(availableSpacesCount(layoutDto.getDefaultLayout()));
-            modelMapper.map(defaultLayout,responseLayoutDto);
+            modelMapper.map(defaultLayout, responseLayoutDto);
             company.getCompanyLayout().add(defaultLayout);
-        } else if (layoutDto.getDefaultLayout()==null) {
-            int ind=0;
-            for (Company.DefaultLayout defaultLayout:company.getCompanyLayout()){
-                if(defaultLayout.getLayoutId().equals(layoutDto.getLayoutId())){
+        } else if (layoutDto.getDefaultLayout() == null) {
+            int ind = 0;
+            for (Company.DefaultLayout defaultLayout : company.getCompanyLayout()) {
+                if (defaultLayout.getLayoutId().equals(layoutDto.getLayoutId())) {
                     company.getCompanyLayout().remove(ind);
                     break;
                 }
                 ind++;
             }
             company.setCompanyLayout(company.getCompanyLayout());
-        }
-        else{
-            int ind=0;
-            for (Company.DefaultLayout defaultLayout:company.getCompanyLayout()){
-                if(defaultLayout.getLayoutId().equals(layoutDto.getLayoutId())){
+        } else {
+            int ind = 0;
+            for (Company.DefaultLayout defaultLayout : company.getCompanyLayout()) {
+                if (defaultLayout.getLayoutId().equals(layoutDto.getLayoutId())) {
                     defaultLayout.setCompanyLayout(layoutDto.getDefaultLayout());
                     defaultLayout.setTotalSpace(availableSpacesCount(layoutDto.getDefaultLayout()));
-                    company.getCompanyLayout().set(ind,defaultLayout);
-                    modelMapper.map(defaultLayout,responseLayoutDto);
+                    company.getCompanyLayout().set(ind, defaultLayout);
+                    modelMapper.map(defaultLayout, responseLayoutDto);
                     break;
                 }
                 ind++;
@@ -183,18 +173,17 @@ public class AllocationServiceImpl implements AllocationService {
         }
         responseLayoutDto.setCompanyName(layoutDto.getCompanyName());
         companyRepository.save(company);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(responseLayoutDto,"updates done",HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(responseLayoutDto, "updates done", HttpStatus.OK));
 
     }
 
 
     Company isValid(LayoutDto layoutDto) throws BadRequestException {
-        Optional<Company> company=companyRepository.findByCompanyName(layoutDto.getCompanyName());
-        if(company.isEmpty())
-            throw new BadRequestException("company not present");
-        if(layoutDto.getLayoutId()==null && layoutDto.getDefaultLayout()==null)
+        Optional<Company> company = companyRepository.findByCompanyName(layoutDto.getCompanyName());
+        if (company.isEmpty()) throw new BadRequestException("company not present");
+        if (layoutDto.getLayoutId() == null && layoutDto.getDefaultLayout() == null)
             throw new BadRequestException("data not present");
-        if(layoutDto.getLayoutId()!=null&&companyRepoService.findByLayoutId(layoutDto.getLayoutId())==null)
+        if (layoutDto.getLayoutId() != null && companyRepoService.findByLayoutId(layoutDto.getLayoutId()) == null)
             throw new BadRequestException("layoutId not present");
         return company.get();
     }

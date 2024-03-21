@@ -12,9 +12,9 @@ import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 @NoArgsConstructor
 public class TeamDto {
 
-    @JsonProperty("TeamName")
-    private String TeamName;
+    @JsonProperty("teamName")
+    private String teamName;
 
-    @JsonProperty("TeamCount")
-    private Integer TeamCount;
+    @JsonProperty("teamCount")
+    private Integer teamCount;
 }

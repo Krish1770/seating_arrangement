@@ -5,21 +5,19 @@ import com.example.seatingarrangement.entity.Allocation;
 import com.example.seatingarrangement.entity.Team;
 import com.example.seatingarrangement.entity.TeamInfo;
 import com.example.seatingarrangement.entity.Type;
+import com.example.seatingarrangement.exception.BadRequestException;
 import com.example.seatingarrangement.repository.AllocationRepository;
-import com.example.seatingarrangement.repository.CompanyRepository;
+import com.example.seatingarrangement.repository.TeamRepository;
 import com.example.seatingarrangement.repository.service.AllocationRepoService;
 import com.example.seatingarrangement.repository.service.CompanyRepoService;
 import com.example.seatingarrangement.repository.service.TeamRepoService;
-import com.example.seatingarrangement.repository.TeamRepository;
 import com.example.seatingarrangement.service.AllocationAbstract;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 
 import java.util.*;
 
@@ -38,41 +36,17 @@ public class BacktrackingImpl  extends AllocationAbstract {
     static int count = 0;
     static int minSteps = 100;
     static int[][] trace;
-
-
-//    @Autowired
-//    CompanyRepoService companyRepositoryService;
-
-//    @Autowired
-//    private TeamRepoService teamRepositoryService;
-
-//    @Autowired
-//    private AllocationRepository allocationRepository;
-    
-//    @Autowired
-//    private AllocationRepoService allocationRepositoryService;
-
-//    @Autowired
-//    private CompanyRepository companyRepository;
-//    @Autowired
-//    ModelMapper modelMapper;
-    
-//    @Autowired
-//    private TeamRepository teamRepository;
 @Autowired
-    public BacktrackingImpl(TeamRepoService teamRepoService,CompanyRepoService companyRepositoryService,TeamRepository teamRepository,AllocationRepoService allocationRepoService, AllocationRepository allocationRepository,ModelMapper modelMapper) {
-        super(teamRepoService,companyRepositoryService, teamRepository, allocationRepoService,allocationRepository,modelMapper);
+    public BacktrackingImpl(TeamRepoService teamRepoService,CompanyRepoService companyRepoService,TeamRepository teamRepository,AllocationRepoService allocationRepoService, AllocationRepository allocationRepository,ModelMapper modelMapper) {
+        super(teamRepoService,companyRepoService, teamRepository, allocationRepoService,allocationRepository,modelMapper);
     }
 
 
     public ResponseEntity<ResponseDto> createAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
-        {
-            System.out.println("inside");
             int wantedSpace = 0;
             for (TeamDto teamList : teamObjectDto.getTeamDtoList())
                 wantedSpace += teamList.getTeamCount();
             GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(teamObjectDto.getLayoutId());
-            System.out.println(getLayoutDto);
             int totalSpace = getLayoutDto.getAvailableSpaces();
             if (wantedSpace > totalSpace) {
                 throw new BadRequestException("not sufficient Spaces");
@@ -131,8 +105,17 @@ public class BacktrackingImpl  extends AllocationAbstract {
             tempLayout = defaultLayout;
             findArrangement(teamList);
             UserReferenceDto userReferenceDto = new UserReferenceDto();
-            List<UserReferenceDto.TeamReference> teams = teamList.stream().map(a -> modelMapper.map(a, UserReferenceDto.TeamReference.class))
-                    .toList();
+            List<UserReferenceDto.TeamReference> teams = new ArrayList<>();
+//                    teamList.stream().map(a ->
+//                            modelMapper.map(a, UserReferenceDto.TeamReference.class)
+//                    )
+//                    .toList();
+            for(TeamInfo teamInfo:teamList){
+                UserReferenceDto.TeamReference teamReference=new UserReferenceDto.TeamReference();
+                modelMapper.map(teamInfo,teamReference);
+                teamReference.setKey(teamInfo.getTeamCode());
+                teams.add(teamReference);
+            }
             userReferenceDto.setTeamReferenceList(teams);
             userReferenceDto.setAllocation(arrangement);
             allocation.setAllocationLayout(arrangement);
@@ -144,7 +127,6 @@ public class BacktrackingImpl  extends AllocationAbstract {
             allocationRepository.save(allocation);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto,"allocation saved",HttpStatus.OK));
         }
-    }
 
     private String createTeamCode(int total) {
         String[] alph = {"", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R",
@@ -253,7 +235,6 @@ public class BacktrackingImpl  extends AllocationAbstract {
         return minSteps;
     }
     static boolean findSteps(int x, int y, int resultx, int resulty, int steps, String teamCode) {
-//        log.
         if (x == resultx && y == resulty) {
             steps += 1;
             if (steps < minSteps)
