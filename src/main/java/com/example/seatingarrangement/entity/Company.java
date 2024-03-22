@@ -18,6 +18,7 @@ import java.util.Map;
 @Document(collection = "Company")
 public class Company {
 
+ @Id
     private String companyId;
     private String companyName;
     private List<DefaultLayout> companyLayout;
