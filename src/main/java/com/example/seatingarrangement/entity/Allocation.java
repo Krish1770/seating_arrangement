@@ -1,5 +1,6 @@
 package com.example.seatingarrangement.entity;
 
+import com.example.seatingarrangement.enums.Type;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;

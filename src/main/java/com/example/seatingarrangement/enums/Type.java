@@ -1,4 +1,4 @@
-package com.example.seatingarrangement.entity;
+package com.example.seatingarrangement.enums;
 
 public enum Type {
     ASC,

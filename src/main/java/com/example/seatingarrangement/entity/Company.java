@@ -17,7 +17,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Document(collection = "Company")
 public class Company {
-    @Id
+
     private String companyId;
     private String companyName;
     private List<DefaultLayout> companyLayout;

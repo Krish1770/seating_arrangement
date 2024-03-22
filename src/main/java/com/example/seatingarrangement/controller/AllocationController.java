@@ -19,34 +19,20 @@ public class AllocationController implements AllocationApi {
 
     @Autowired
     private AllocationService allocationService;
-    @Override
-    public ResponseEntity<ResponseDto> add(CompanyDto companyDto) throws BadRequestException {
-        System.out.println("hi");
-        return allocationService.add(companyDto);
-    }
+
     @Override
     public ResponseEntity<ResponseDto> addAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
 
-//        HashMap<String, Integer> toBeAllocated=new HashMap<>();
-//        System.out.println("i    "+teamObjectDto);
-//        for(TeamDto i:teamObjectDto.getTeamDtoList())
-//        {
-//            toBeAllocated.put(i.getTeamName(),i.getTeamCount());
-//        }
-//        System.out.println( "toBeAllocated"+toBeAllocated);
-//        AllocationDto allocationDto=new AllocationDto(toBeAllocated, teamObjectDto.getPreference());
         return allocationService.addAllocation(teamObjectDto);
     }
 
-    @Override
-    public ResponseEntity<ResponseDto> updateLayout(LayoutDto layoutDto) throws BadRequestException {
-         return allocationService.updateLayout(layoutDto);
-    }
+
 
     @Override
-    public ResponseEntity<ResponseDto> getAllLayOut(String companyName) {
-        return allocationService.getAllLayOut(companyName);
+    public ResponseEntity<ResponseDto> getAllocations(String companyName) {
+        return allocationService.getAllocations(companyName);
     }
+
 
     @Override
     public ResponseEntity<ResponseDto> convertCsvFile(MultipartFile file) throws IOException {

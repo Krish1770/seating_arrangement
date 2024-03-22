@@ -4,15 +4,15 @@ import com.example.seatingarrangement.dto.*;
 import com.example.seatingarrangement.entity.Allocation;
 import com.example.seatingarrangement.entity.Team;
 import com.example.seatingarrangement.entity.TeamInfo;
-import com.example.seatingarrangement.entity.Type;
+import com.example.seatingarrangement.enums.Type;
 import com.example.seatingarrangement.repository.AllocationRepository;
-import com.example.seatingarrangement.repository.CompanyRepository;
 import com.example.seatingarrangement.repository.service.AllocationRepoService;
 import com.example.seatingarrangement.repository.service.CompanyRepoService;
 import com.example.seatingarrangement.repository.service.TeamRepoService;
 import com.example.seatingarrangement.repository.TeamRepository;
 import com.example.seatingarrangement.service.AllocationAbstract;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.dump.DumpArchiveEntry;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,87 +64,179 @@ public class BacktrackingImpl  extends AllocationAbstract {
         super(teamRepoService,companyRepositoryService, teamRepository, allocationRepoService,allocationRepository,modelMapper);
     }
 
-
     public ResponseEntity<ResponseDto> createAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
-        {
-            System.out.println("inside");
-            int wantedSpace = 0;
-            for (TeamDto teamList : teamObjectDto.getTeamDtoList())
-                wantedSpace += teamList.getTeamCount();
-            GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(teamObjectDto.getLayoutId());
-            System.out.println(getLayoutDto);
-            int totalSpace = getLayoutDto.getAvailableSpaces();
-            if (wantedSpace > totalSpace) {
-                throw new BadRequestException("not sufficient Spaces");
-            }
-            Allocation allocation = new Allocation();
-            allocation.setAllocationId(UUID.randomUUID().toString());
-            List<TeamInfo> teamList = new ArrayList<>();
-            String teamId;
-            Team team1=teamRepoService.findTeamsByTeamInfo(teamObjectDto.getTeamDtoList(),teamObjectDto.getTeamDtoList().size());
-            if(team1!=null){
-                teamId=team1.getTeamId();
-                Type type;
-                teamList=teamRepoService.findByTeamId(teamId).get().getTeams();
-                if(teamObjectDto.getPreference()!=0){
-                    if(teamObjectDto.getPreference()==1) {
-                        type= Type.DESC;
-                    }
-                    else
-                        type= Type.ASC;
-                    Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(),type);
-                    if (allocatedLayout!=null)
-                        throw new BadRequestException("already Selected");
+        int wantedSpace = 0;
+        for (TeamDto teamList : teamObjectDto.getTeamDtoList())
+            wantedSpace += teamList.getTeamCount();
+        GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(teamObjectDto.getLayoutId());
+        int totalSpace = getLayoutDto.getAvailableSpaces();
+        System.out.println(wantedSpace+" "+totalSpace+"                haiiiiiiiiiiiii");
+        if (wantedSpace > totalSpace) {
+            throw new BadRequestException("not sufficient Spaces");
+        }
+        Allocation allocation = new Allocation();
+        allocation.setAllocationId(UUID.randomUUID().toString());
+        List<TeamInfo> teamList = new ArrayList<>();
+        String teamId;
+        Team team1=teamRepoService.findTeamsByTeamInfo(teamObjectDto.getTeamDtoList(),teamObjectDto.getTeamDtoList().size());
+        if(team1!=null){
+            teamId=team1.getTeamId();
+            Type type;
+            teamList=teamRepoService.findByTeamId(teamId).get().getTeams();
+            if(teamObjectDto.getPreference()!=3){
+                if(teamObjectDto.getPreference()==1) {
+                    type= Type.ASC;
                 }
+                else
+                    type= Type.DESC;
+
+
+                Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(),type);
+                if (allocatedLayout!=null)
+                    throw new BadRequestException("already Selected");
             }
-            else {
-                Team team=new Team();
-                team.setTeamId(UUID.randomUUID().toString());
-                int total = 0;
-                for (TeamDto teams : teamObjectDto.getTeamDtoList()) {
-                    TeamInfo teamInfo = new TeamInfo();
-                    modelMapper.map(teams, teamInfo);
-                    String teamCode = createTeamCode(++total);
-                    teamInfo.setTeamCode(teamCode);
-                    teamList.add(teamInfo);
-                }
-                team.setTeams(teamList);
-                team.setLayoutId(teamObjectDto.getLayoutId());
-                team=teamRepository.save(team);
-                teamId=team.getTeamId();}
-            allocation.setTeamId(teamId);
-            allocation.setDefaultLayoutId(teamObjectDto.getLayoutId());
-            if (teamObjectDto.getPreference() == 1) {
-                allocation.setAllocationType(Type.DESC);
-                teamList.sort(Comparator.comparing(TeamInfo::getTeamCount).reversed());
-            } else if (teamObjectDto.getPreference() == 2){
-                allocation.setAllocationType(Type.ASC);
-                teamList.sort(Comparator.comparing(TeamInfo::getTeamCount));
+        }
+        else {
+            Team team=new Team();
+            team.setTeamId(UUID.randomUUID().toString());
+            int total = 0;
+            for (TeamDto teams : teamObjectDto.getTeamDtoList()) {
+                TeamInfo teamInfo = new TeamInfo();
+                modelMapper.map(teams, teamInfo);
+                String teamCode = createTeamCode(++total);
+                teamInfo.setTeamCode(teamCode);
+                teamList.add(teamInfo);
             }
-            else{
-                allocation.setAllocationType(Type.RANDOM);
-                teamList = new HashSet<>(teamList).stream().toList();
-            }
-            log.info(teamList.toString());
-            int[][] defaultLayout = getLayoutDto.getLayout();
-            arrangement = new String[defaultLayout.length][defaultLayout[0].length];
-            tempLayout = defaultLayout;
-            findArrangement(teamList);
-            UserReferenceDto userReferenceDto = new UserReferenceDto();
-            List<UserReferenceDto.TeamReference> teams = teamList.stream().map(a -> modelMapper.map(a, UserReferenceDto.TeamReference.class))
-                    .toList();
-            userReferenceDto.setTeamReferenceList(teams);
-            userReferenceDto.setAllocation(arrangement);
-            allocation.setAllocationLayout(arrangement);
+            team.setTeams(teamList);
+            team.setLayoutId(teamObjectDto.getLayoutId());
+            team=teamRepository.save(team);
+            teamId=team.getTeamId();}
+
+        allocation.setTeamId(teamId);
+        allocation.setDefaultLayoutId(teamObjectDto.getLayoutId());
+        if (teamObjectDto.getPreference() == 1) {
+            allocation.setAllocationType(Type.ASC);
+            teamList.sort(Comparator.comparing(TeamInfo::getTeamCount).reversed());
+        } else if (teamObjectDto.getPreference() == 2){
+            allocation.setAllocationType(Type.DESC);
+            teamList.sort(Comparator.comparing(TeamInfo::getTeamCount));
+        }
+        else{
+            allocation.setAllocationType(Type.RANDOM);
+            teamList = new HashSet<>(teamList).stream().toList();
+        }
+        log.info(teamList.toString());
+        int[][] defaultLayout = getLayoutDto.getLayout();
+        arrangement = new String[defaultLayout.length][defaultLayout[0].length];
+        tempLayout = defaultLayout;
+        findArrangement(teamList);
+        UserReferenceDto userReferenceDto = new UserReferenceDto();
+        List<UserReferenceDto.TeamReference> teams = new ArrayList<>();
+//                    teamList.stream().map(a ->
+//                            modelMapper.map(a, UserReferenceDto.TeamReference.class)
+//                    )
+//                    .toList();
+        for(TeamInfo teamInfo:teamList){
+            UserReferenceDto.TeamReference teamReference=new UserReferenceDto.TeamReference();
+            modelMapper.map(teamInfo,teamReference);
+            teamReference.setKey(teamInfo.getTeamCode());
+            teams.add(teamReference);
+        }
+        userReferenceDto.setTeamReferenceList(teams);
+        userReferenceDto.setAllocation(arrangement);
+        allocation.setAllocationLayout(arrangement);
 //        for (int i = 0; i < arrangement.length; i++) {
 //            for (int j = 0; j < arrangement[0].length; j++)
 //                System.out.print(arrangement[i][j] + " ");
 //            System.out.println();
 //        }
-            allocationRepository.save(allocation);
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto,"allocation saved",HttpStatus.OK));
-        }
+        allocationRepository.save(allocation);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto,"allocation saved",HttpStatus.OK));
     }
+
+
+
+
+//    public ResponseEntity<ResponseDto> createAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
+//        {
+//            System.out.println("inside");
+//            int wantedSpace = 0;
+//            for (TeamDto teamList : teamObjectDto.getTeamDtoList())
+//                wantedSpace += teamList.getTeamCount();
+//            GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(teamObjectDto.getLayoutId());
+//            System.out.println(getLayoutDto);
+//            int totalSpace = getLayoutDto.getAvailableSpaces();
+//            if (wantedSpace > totalSpace) {
+//                throw new BadRequestException("not sufficient Spaces");
+//            }
+//            Allocation allocation = new Allocation();
+//            allocation.setAllocationId(UUID.randomUUID().toString());
+//            List<TeamInfo> teamList = new ArrayList<>();
+//            String teamId;
+//            Team team1=teamRepoService.findTeamsByTeamInfo(teamObjectDto.getTeamDtoList(),teamObjectDto.getTeamDtoList().size());
+//            if(team1!=null){
+//                teamId=team1.getTeamId();
+//                Type type;
+//                teamList=teamRepoService.findByTeamId(teamId).get().getTeams();
+//                if(teamObjectDto.getPreference()!=0){
+//                    if(teamObjectDto.getPreference()==1) {
+//                        type= Type.DESC;
+//                    }
+//                    else
+//                        type= Type.ASC;
+//                    Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(),type);
+//                    if (allocatedLayout!=null)
+//                        throw new BadRequestException("already Selected");
+//                }
+//            }
+//            else {
+//                Team team=new Team();
+//                team.setTeamId(UUID.randomUUID().toString());
+//                int total = 0;
+//                for (TeamDto teams : teamObjectDto.getTeamDtoList()) {
+//                    TeamInfo teamInfo = new TeamInfo();
+//                    modelMapper.map(teams, teamInfo);
+//                    String teamCode = createTeamCode(++total);
+//                    teamInfo.setTeamCode(teamCode);
+//                    teamList.add(teamInfo);
+//                }
+//                team.setTeams(teamList);
+//                team.setLayoutId(teamObjectDto.getLayoutId());
+//                team=teamRepository.save(team);
+//                teamId=team.getTeamId();}
+//            allocation.setTeamId(teamId);
+//            allocation.setDefaultLayoutId(teamObjectDto.getLayoutId());
+//            if (teamObjectDto.getPreference() == 1) {
+//                allocation.setAllocationType(Type.DESC);
+//                teamList.sort(Comparator.comparing(TeamInfo::getTeamCount).reversed());
+//            } else if (teamObjectDto.getPreference() == 2){
+//                allocation.setAllocationType(Type.ASC);
+//                teamList.sort(Comparator.comparing(TeamInfo::getTeamCount));
+//            }
+//            else{
+//                allocation.setAllocationType(Type.RANDOM);
+//                teamList = new HashSet<>(teamList).stream().toList();
+//            }
+//            log.info(teamList.toString());
+//            int[][] defaultLayout = getLayoutDto.getLayout();
+//            arrangement = new String[defaultLayout.length][defaultLayout[0].length];
+//            tempLayout = defaultLayout;
+//            findArrangement(teamList);
+//            UserReferenceDto userReferenceDto = new UserReferenceDto();
+//            List<UserReferenceDto.TeamReference> teams = teamList.stream().map(a -> modelMapper.map(a, UserReferenceDto.TeamReference.class))
+//                    .toList();
+//            userReferenceDto.setTeamReferenceList(teams);
+//            userReferenceDto.setAllocation(arrangement);
+//            allocation.setAllocationLayout(arrangement);
+////        for (int i = 0; i < arrangement.length; i++) {
+////            for (int j = 0; j < arrangement[0].length; j++)
+////                System.out.print(arrangement[i][j] + " ");
+////            System.out.println();
+////        }
+//            allocationRepository.save(allocation);
+//            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto,"allocation saved",HttpStatus.OK));
+//        }
+//    }
 
     private String createTeamCode(int total) {
         String[] alph = {"", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R",

@@ -4,7 +4,7 @@ import com.example.seatingarrangement.dto.*;
 import com.example.seatingarrangement.entity.Allocation;
 import com.example.seatingarrangement.entity.Team;
 import com.example.seatingarrangement.entity.TeamInfo;
-import com.example.seatingarrangement.entity.Type;
+import com.example.seatingarrangement.enums.Type;
 import com.example.seatingarrangement.exception.BadRequestException;
 import com.example.seatingarrangement.repository.AllocationRepository;
 import com.example.seatingarrangement.repository.TeamRepository;
@@ -13,6 +13,7 @@ import com.example.seatingarrangement.repository.service.CompanyRepoService;
 import com.example.seatingarrangement.repository.service.TeamRepoService;
 import com.example.seatingarrangement.service.AllocationAbstract;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.impl.xb.xsdschema.All;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,8 @@ public class GreedyImpl extends AllocationAbstract {
     private int[][] arr;
     private Integer pref = 0;
     private int[][] dp;
+
+    private LinkedHashMap<String,Integer> finalMap=new LinkedHashMap<String,Integer>();
     private String[][] teamNames;
     private Map<String, Character> tempTeamList = new LinkedHashMap<>();
     private List<UserReferenceDto.TeamReference> tempTeamList2 = new ArrayList<>();
@@ -183,6 +186,7 @@ public class GreedyImpl extends AllocationAbstract {
     public ResponseEntity<ResponseDto> createAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
         HashMap<String, Integer> toBeAllocated = new HashMap<>();
         System.out.println("i    " + teamObjectDto);
+        Team team = null;
         for (TeamDto i : teamObjectDto.getTeamDtoList()) {
             toBeAllocated.put(i.getTeamName(), i.getTeamCount());
         }
@@ -192,7 +196,7 @@ public class GreedyImpl extends AllocationAbstract {
         pref = allocationDto.getPreference();
         GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(layoutId);
 //         GetLayoutDto getLayoutDto=new GetLayoutDto();
-         getLayoutDto.setAvailableSpaces(20);
+//         getLayoutDto.setAvailableSpaces(20);
         LinkedHashMap<String, Character> teamList = new LinkedHashMap<>();
         int spacesTobeAllocated = 0;
         HashMap<String, Integer> map = allocationDto.getToBeAllocated();  //ch
@@ -210,22 +214,45 @@ public class GreedyImpl extends AllocationAbstract {
         Team team1 = teamRepoService.findTeamsByTeamInfo(teamObjectDto.getTeamDtoList(), teamObjectDto.getTeamDtoList().size());
         System.out.println(team1+"goooooooooooood");
         if (team1 != null) {
+            Optional<Team> team2=teamRepository.findByTeamId(team1.getTeamId());
+            System.out.println("inside 1");
             teamId = team1.getTeamId();
             Type type;
-            teamInfos = teamRepoService.findByTeamId(teamId).get().getTeams();
-            if (teamObjectDto.getPreference() != 0) {
-                if (teamObjectDto.getPreference() == 1) {
-                    type = Type.DESC;
-                } else
-                    type = Type.ASC;
-                Allocation allocatedLayout = allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(), type);
-                if (allocatedLayout != null)
+//            teamInfos = teamRepoService.findByTeamId(teamId).get().getTeams();
+            if(teamObjectDto.getPreference()!=3){
+                if(teamObjectDto.getPreference()==1) {
+                    type= Type.ASC;
+                }
+                else
+                    type= Type.DESC;
+
+
+                Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(),type);
+                if (allocatedLayout!=null)
                     throw new BadRequestException("already Selected");
             }
+
+            for(TeamInfo teamInfo: team2.get().getTeams())
+                {
+                 teamList.put(teamInfo.getTeamName(),teamInfo.getTeamCode().charAt(0));
+                 map.put(teamInfo.getTeamName(),teamInfo.getTeamCount());
+                }
+
+                finalMap.putAll(map);
+                tempTeamList = teamList;
+                SeatingCalculationDto seatingCalculationDto = new SeatingCalculationDto(getLayoutDto.getLayout(), teamList, map);
+                seatingCalculation(seatingCalculationDto);
+
+                 System.out.println("teamList"+teamList);
+                System.out.println("map"+map);
+                team=team2.get();
+
         } else {
+            System.out.println("inside 2");
             TeamInfo teamInfo = new TeamInfo();
             LinkedHashMap<String, Character> tempList = new LinkedHashMap<>();
             for (String name : map.keySet()) {
+                teamInfo=new TeamInfo();
                 if (tempList.isEmpty()) {
                     tempList.put(name, 'A');
                     teamInfo.setTeamCode("A");
@@ -239,11 +266,20 @@ public class GreedyImpl extends AllocationAbstract {
                 teamInfo.setTeamName(name);
                 teamInfo.setTeamCount(map.get(name));
                 teamInfos.add(teamInfo);
+                System.out.println("teamInfos"+teamInfos);
             }
-            tempTeamList = tempList;
+            tempTeamList = teamList;
             SeatingCalculationDto seatingCalculationDto = new SeatingCalculationDto(getLayoutDto.getLayout(), teamList, map);
+            System.out.println("teamList"+teamList);
+            System.out.println("map"+map);
             seatingCalculation(seatingCalculationDto);
+            finalMap.putAll(map);
             log.info(tempList.toString());
+             team = new Team();
+            team.setTeamId(UUID.randomUUID().toString());
+            team.setTeams(teamInfos);
+            team.setLayoutId(layoutId);
+            teamRepository.save(team);
         }
 
         Allocation allocation = new Allocation();
@@ -255,10 +291,7 @@ public class GreedyImpl extends AllocationAbstract {
         else
             allocation.setAllocationType(Type.RANDOM);
         allocation.setAllocationLayout(teamNames);
-        Team team = new Team();
-        team.setTeams(teamInfos);
-        team.setLayoutId(layoutId);
-        teamRepository.save(team);
+        allocation.setTeamId(team.getTeamId());
         UserReferenceDto userReferenceDto = new UserReferenceDto(teamNames, tempTeamList2);
         allocationRepository.save(allocation);
         log.info("teamList" + tempTeamList1);

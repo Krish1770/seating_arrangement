@@ -12,13 +12,9 @@ import java.util.List;
 
 @Service
 public interface AllocationService {
-    ResponseEntity<ResponseDto> add(CompanyDto companyDto) throws BadRequestException;
 
     ResponseEntity<ResponseDto> addAllocation(TeamObjectDto teamObjectDto) throws BadRequestException;
 
-    ResponseEntity<ResponseDto> getAllLayOut(String companyName);
-
     CsvOutputDto convertCsvFile(InputStream inputStream) throws IOException;
-
-    ResponseEntity<ResponseDto> updateLayout(LayoutDto layoutDto) throws BadRequestException;
+    ResponseEntity<ResponseDto> getAllocations(String companyName);
 }

@@ -1,18 +1,17 @@
 package com.example.seatingarrangement.entity;
 
 import lombok.Data;
-import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
 
-@Document
+@Document(collection = "Team")
 @Data
 public class Team {
+
 
     private String teamId;
 
