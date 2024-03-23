@@ -116,9 +116,16 @@ public class AllocationServiceImpl implements AllocationService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllocations(String companyName) {
-//        Optional<Allocation> allocation=allocationRepoService.findByCompanyName(companyName);  //dto to be created
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto("","allocation retrieved",HttpStatus.OK));
+    public ResponseEntity<ResponseDto> getAllocations(String layoutId) {
+        Optional<List<GetAllocationDto>>  getAllocationDto=allocationRepoService.findByDefaultLayoutId(layoutId);  //dto to be created
+
+        if(getAllocationDto.isPresent()) {
+            System.out.println(getAllocationDto.get().stream().toString() + " values");
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(getAllocationDto.get(), "allocation retrieved", HttpStatus.OK));
+        }
+        else
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDto("", " no allocation for the given id", HttpStatus.OK));
+
 
 
 

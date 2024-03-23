@@ -29,8 +29,8 @@ public class AllocationController implements AllocationApi {
 
 
     @Override
-    public ResponseEntity<ResponseDto> getAllocations(String companyName) {
-        return allocationService.getAllocations(companyName);
+    public ResponseEntity<ResponseDto> getAllocations(String layoutId) {
+        return allocationService.getAllocations(layoutId);
     }
 
 

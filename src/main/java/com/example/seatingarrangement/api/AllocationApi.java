@@ -14,15 +14,16 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
+@RequestMapping("Allocation")
 @CrossOrigin
 public interface AllocationApi {
 
-    @PostMapping("allocation") //to be
+    @PostMapping() //to be
     ResponseEntity<ResponseDto> addAllocation(@RequestBody TeamObjectDto teamObjectDto) throws BadRequestException;
 
     @PostMapping("/csvFile")  //checked
     ResponseEntity<ResponseDto> convertCsvFile(@RequestBody MultipartFile file) throws IOException;
 
-    @GetMapping("/Allocations/{companyName}")
-    ResponseEntity<ResponseDto> getAllocations(@PathVariable String companyName);
+    @GetMapping("{layoutId}")
+    ResponseEntity<ResponseDto> getAllocations(@PathVariable String layoutId);
 }

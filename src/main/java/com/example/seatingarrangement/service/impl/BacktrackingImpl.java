@@ -91,7 +91,8 @@ public class BacktrackingImpl  extends AllocationAbstract {
                     type= Type.DESC;
 
 
-                Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(),type);
+                Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationTypeAndAllocationPreference(teamObjectDto.getLayoutId(),type,teamObjectDto.getAlgorithmPref());
+                System.out.println(allocatedLayout);
                 if (allocatedLayout!=null)
                     throw new BadRequestException("already Selected");
             }
@@ -114,6 +115,7 @@ public class BacktrackingImpl  extends AllocationAbstract {
 
         allocation.setTeamId(teamId);
         allocation.setDefaultLayoutId(teamObjectDto.getLayoutId());
+        allocation.setAlgorithmPref(teamObjectDto.getAlgorithmPref());
         if (teamObjectDto.getPreference() == 1) {
             allocation.setAllocationType(Type.ASC);
             teamList.sort(Comparator.comparing(TeamInfo::getTeamCount).reversed());

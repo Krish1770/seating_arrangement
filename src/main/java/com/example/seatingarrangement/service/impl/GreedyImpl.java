@@ -227,7 +227,8 @@ public class GreedyImpl extends AllocationAbstract {
                     type= Type.DESC;
 
 
-                Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationType(teamObjectDto.getLayoutId(),type);
+                Allocation allocatedLayout=allocationRepoService.findByDefaultLayoutIdAndAllocationTypeAndAllocationPreference(teamObjectDto.getLayoutId(),type,teamObjectDto.getAlgorithmPref());
+                System.out.println("allocatedLayout"+"   "+allocatedLayout);
                 if (allocatedLayout!=null)
                     throw new BadRequestException("already Selected");
             }
@@ -291,9 +292,11 @@ public class GreedyImpl extends AllocationAbstract {
         else
             allocation.setAllocationType(Type.RANDOM);
         allocation.setAllocationLayout(teamNames);
+        allocation.setAlgorithmPref(teamObjectDto.getAlgorithmPref());
         allocation.setTeamId(team.getTeamId());
         UserReferenceDto userReferenceDto = new UserReferenceDto(teamNames, tempTeamList2);
         allocationRepository.save(allocation);
+        System.out.println(allocation);
         log.info("teamList" + tempTeamList1);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, "allocation created", HttpStatus.OK));
     }
@@ -390,6 +393,7 @@ public class GreedyImpl extends AllocationAbstract {
                     al.set(i, al.get(i) - dp[temph][tempg]);
                 }
             }
+            System.out.println("hi"+tempTeamList2);
         }
     }
 

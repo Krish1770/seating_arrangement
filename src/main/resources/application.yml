@@ -1,0 +1,19 @@
+spring:
+ data:
+  mongodb:
+   uri: mongodb://localhost:27017/Seating-Management
+
+ properties:
+  javax:
+   persistence:
+    validation:
+     mode: none
+
+logging:
+ level:
+  org:
+   springframework:
+    data:
+     mongodb:
+       core:
+        MongoTemplate: DEBUG
