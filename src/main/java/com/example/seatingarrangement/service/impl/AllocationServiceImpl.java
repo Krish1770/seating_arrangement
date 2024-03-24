@@ -49,34 +49,21 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Override
     public ResponseEntity<ResponseDto> addAllocation(TeamObjectDto teamObjectDto) throws BadRequestException {
-        AllocationAbstract allocationAbstract;
-          if(teamObjectDto.getAlgorithmPref()==1)
-          {
-              GreedyImpl greedyImpl=new GreedyImpl(teamRepoService,companyRepoService,teamRepository,allocationRepoService,allocationRepository,modelMapper);
 
-              System.out.println("h       i          "+companyRepository.findByLayoutId(teamObjectDto.getLayoutId()));
+        if (teamObjectDto.getAlgorithmPref() == 1) {
+            GreedyImpl greedyImpl = new GreedyImpl(teamRepoService, companyRepoService, teamRepository, allocationRepoService, allocationRepository, modelMapper);
+
+            System.out.println("h       i          " + companyRepository.findByLayoutId(teamObjectDto.getLayoutId()));
             return greedyImpl.createAllocation(teamObjectDto);
 
-          }
-          else if(teamObjectDto.getAlgorithmPref()==2)
-          {
-              BacktrackingImpl backtracking=new BacktrackingImpl(teamRepoService,companyRepoService,teamRepository,allocationRepoService,allocationRepository,modelMapper);
+        } else if (teamObjectDto.getAlgorithmPref() == 2) {
+            BacktrackingImpl backtracking = new BacktrackingImpl(teamRepoService, companyRepoService, teamRepository, allocationRepoService, allocationRepository, modelMapper);
 
-              System.out.println("BTTTTTTTTTT");
-           return   backtracking.createAllocation(teamObjectDto);
-          }
-
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("","incorrect choice",HttpStatus.BAD_REQUEST));
-    }
-
-    private int availableSpacesCount(int[][] layOut) {
-        int total = 0;
-        for (int[] value : layOut) {
-            String m = Arrays.toString(value);
-            String h = m.replace("1", "");
-            total += m.length() - h.length();
+            System.out.println("BTTTTTTTTTT");
+            return backtracking.createAllocation(teamObjectDto);
         }
-        return total;
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("", "incorrect choice", HttpStatus.BAD_REQUEST));
     }
 
     @Override
@@ -117,20 +104,13 @@ public class AllocationServiceImpl implements AllocationService {
 
     @Override
     public ResponseEntity<ResponseDto> getAllocations(String layoutId) {
-        Optional<List<GetAllocationDto>>  getAllocationDto=allocationRepoService.findByDefaultLayoutId(layoutId);  //dto to be created
+        Optional<List<GetAllocationDto>> getAllocationDto = allocationRepoService.findByDefaultLayoutId(layoutId);  //dto to be created
 
-        if(getAllocationDto.isPresent()) {
+        if (getAllocationDto.isPresent()) {
             System.out.println(getAllocationDto.get().stream().toString() + " values");
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(getAllocationDto.get(), "allocation retrieved", HttpStatus.OK));
-        }
-        else
+        } else
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDto("", " no allocation for the given id", HttpStatus.OK));
 
-
-
-
-
     }
-
-
 }

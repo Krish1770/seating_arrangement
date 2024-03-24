@@ -41,7 +41,7 @@ public class AllocationController implements AllocationApi {
         CsvOutputDto csvOutputDto=allocationService.convertCsvFile(inputStream);
         if(csvOutputDto.isFlag())
          return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(csvOutputDto,"file converted",HttpStatus.OK));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("","file not converted",HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDto("","file not converted . null column found",HttpStatus.OK));
 
     }
 
