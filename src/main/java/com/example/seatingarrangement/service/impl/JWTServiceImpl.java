@@ -24,11 +24,11 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public String extractUsername(String token) {
-        return extractClaim(token,Claims::getSubject);
+        return extractAllClaims(token).getSubject();
     }
     @Override
     public Date extractExpiration(String token) {
-        return extractClaim(token,Claims::getExpiration);
+        return extractAllClaims(token).getExpiration();
     }
     @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -88,7 +88,7 @@ public class JWTServiceImpl implements JWTService {
     @Override
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username= extractUsername(token);
-        return(username.equals(userDetails.getUsername()) && isTokenExpired(token));
+        return(username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token) {
