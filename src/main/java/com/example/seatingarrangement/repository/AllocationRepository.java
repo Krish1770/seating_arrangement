@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AllocationRepository extends MongoRepository<Allocation,String> {
+public interface AllocationRepository extends MongoRepository<Allocation, String> {
     Optional<Allocation> findByDefaultLayoutIdAndAllocationTypeAndAlgorithmPref(String layoutId, Type allocationType, Integer allocationPref);
 
     @Aggregation({
@@ -23,5 +23,5 @@ public interface AllocationRepository extends MongoRepository<Allocation,String>
             "{$unwind: '$teamData'}",
             "{$project: {'data.teamId': 0, 'data.defaultLayoutId': 0, 'data._class': 0, 'result.layoutId': 0}}"
     })
-    Optional<List<GetAllocationDto>>findByDefaultLayoutId(String layoutId);
+    Optional<List<GetAllocationDto>> findByDefaultLayoutId(String layoutId);
 }

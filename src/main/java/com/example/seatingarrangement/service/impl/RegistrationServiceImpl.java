@@ -33,25 +33,24 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final SessionRepoService sessionRepoService;
-//    private final SessionRepo sessionRepo;
 
 
     @Override
     public CompanyDetails register(SignUpRequestDTO signUpRequestDTO) {
-       Optional<CompanyDetails> companyDetails= registrationRepoService.findByCompanyNameOrEmail(signUpRequestDTO.getCompanyName(),signUpRequestDTO.getEmail());
-        if(companyDetails.isPresent()){
+        Optional<CompanyDetails> companyDetails = registrationRepoService.findByCompanyNameOrEmail(signUpRequestDTO.getCompanyName(), signUpRequestDTO.getEmail());
+        if (companyDetails.isPresent()) {
 
-                if(companyDetails.get().getCompanyName().equals(signUpRequestDTO.getCompanyName()) && companyDetails.get().getEmail().equals(signUpRequestDTO.getEmail())){
-                    throw new DuplicateRegistrationException(Constant.COMPANY_NAME_EMAIL_EXITS);
-                } else if (companyDetails.get().getCompanyName().equals(signUpRequestDTO.getCompanyName())) {
+            if (companyDetails.get().getCompanyName().equals(signUpRequestDTO.getCompanyName()) && companyDetails.get().getEmail().equals(signUpRequestDTO.getEmail())) {
+                throw new DuplicateRegistrationException(Constant.COMPANY_NAME_EMAIL_EXITS);
+            } else if (companyDetails.get().getCompanyName().equals(signUpRequestDTO.getCompanyName())) {
 
-                    throw new DuplicateRegistrationException(Constant.COMPANY_NAME_EXITS);
-                } else if (companyDetails.get().getEmail().equals(signUpRequestDTO.getEmail())) {
-                    throw new DuplicateRegistrationException(Constant.COMPANY_EMAIL_EXITS);
-                }
+                throw new DuplicateRegistrationException(Constant.COMPANY_NAME_EXITS);
+            } else if (companyDetails.get().getEmail().equals(signUpRequestDTO.getEmail())) {
+                throw new DuplicateRegistrationException(Constant.COMPANY_EMAIL_EXITS);
+            }
         }
-        CompanyDetails companyInfo =  modelMapper.map(signUpRequestDTO, CompanyDetails.class);
-        String password= companyInfo.getPassword();
+        CompanyDetails companyInfo = modelMapper.map(signUpRequestDTO, CompanyDetails.class);
+        String password = companyInfo.getPassword();
         companyInfo.setPassword(passwordEncoder.encode(password));
         return registrationRepoService.save(companyInfo);
     }
@@ -59,14 +58,13 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 
-            Optional<CompanyDetails> companyDetails= registrationRepoService.findByEmail(loginRequestDTO.getEmailid());
-   if(companyDetails.isEmpty())
-   {
-       throw  new UserNotFoundException(Constant.USER_NOT_FOUND);
-   }
+        Optional<CompanyDetails> companyDetails = registrationRepoService.findByEmail(loginRequestDTO.getEmailid());
+        if (companyDetails.isEmpty()) {
+            throw new UserNotFoundException(Constant.USER_NOT_FOUND);
+        }
         String encodedPasswordFromRequest = passwordEncoder.encode(loginRequestDTO.getPassword());
 
-        if(passwordEncoder.matches(loginRequestDTO.getPassword(), companyDetails.get().getPassword())){
+        if (passwordEncoder.matches(loginRequestDTO.getPassword(), companyDetails.get().getPassword())) {
             String sessionId = UUID.randomUUID().toString();
             Session session = new Session();
             session.setSessionId(sessionId);
@@ -74,50 +72,48 @@ public class RegistrationServiceImpl implements RegistrationService {
             session.setLastmodifiedDate(LocalDateTime.now());
             session.setCompanyDetails(companyDetails.get());
             sessionRepoService.save(session);
-            var token=jwtService.generateToken(companyDetails.get().getCompanyName(),sessionId);
-            String refreshToken= jwtService.generateRefreshToken(companyDetails.get().getCompanyName(),sessionId);
-               LoginResponseDTO loginResponse = LoginResponseDTO.builder()
-                       .email(companyDetails.get().getEmail())
-                       .companyName(companyDetails.get().getCompanyName())
-                       .accessToken(token)
-                       .refreshToken(refreshToken)
+            var token = jwtService.generateToken(companyDetails.get().getCompanyName(), sessionId);
+            String refreshToken = jwtService.generateRefreshToken(companyDetails.get().getCompanyName(), sessionId);
+            LoginResponseDTO loginResponse = LoginResponseDTO.builder()
+                    .email(companyDetails.get().getEmail())
+                    .companyName(companyDetails.get().getCompanyName())
+                    .accessToken(token)
+                    .refreshToken(refreshToken)
 
-                       .build();
-               return loginResponse;
-
-
-           } else if (loginRequestDTO.getPassword()!= companyDetails.get().getPassword()) {
-               throw new  IncorrectPasswordException(Constant.INCORRECT_PASSWORD);
-
-           }
-           else{
-               throw new UserNotFoundException(Constant.USER_NOT_FOUND);
+                    .build();
+            return loginResponse;
 
 
-           }
+        } else if (loginRequestDTO.getPassword() != companyDetails.get().getPassword()) {
+            throw new IncorrectPasswordException(Constant.INCORRECT_PASSWORD);
 
-           }
+        } else {
+            throw new UserNotFoundException(Constant.USER_NOT_FOUND);
+
+
+        }
+
+    }
 
     @Override
     public ResponseEntity<ResponseDto> logout(TokenDto tokenDto) {
-        try{
+        try {
             String accessToken = tokenDto.getAccessToken();
-            Claims claims= jwtService.extractAllClaims(accessToken);
+            Claims claims = jwtService.extractAllClaims(accessToken);
             claims.setExpiration(new Date());
             System.out.println(claims);
-            String sessionId= claims.get("sessionId", String.class);
-            Optional<Session> sessionData= sessionRepoService.findBySessionId(sessionId);
+            String sessionId = claims.get("sessionId", String.class);
+            Optional<Session> sessionData = sessionRepoService.findBySessionId(sessionId);
             Session session = sessionData.get();
             System.out.println(session.getLogoutTime());
-            if(session.getLogoutTime() != null){
+            if (session.getLogoutTime() != null) {
                 throw new AlreadyLogOutException(Constant.ALREADY_LOGGED_OUT);
             }
             session.setLogoutTime(LocalDateTime.now());
             sessionRepoService.save(session);
 
-            return ResponseEntity.ok().body(new ResponseDto(null,"Logged Out",HttpStatus.OK));
-        }
-        catch (Exception e){
+            return ResponseEntity.ok().body(new ResponseDto(null, "Logged Out", HttpStatus.OK));
+        } catch (Exception e) {
             throw new ResourceNotFoundException(Constant.INVALID_TOKEN);
         }
     }

@@ -39,7 +39,7 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/seating/register", "/seating/login","/seating/logout").permitAll().anyRequest().authenticated();
+                    auth.requestMatchers("/seating/register", "/seating/login", "/seating/logout").permitAll().anyRequest().authenticated();
                 })
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

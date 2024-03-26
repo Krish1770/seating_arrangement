@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CompanyController  implements CompanyApi {
+public class CompanyController implements CompanyApi {
 
     @Autowired
     private CompanyService companyService;

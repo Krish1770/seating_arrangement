@@ -14,11 +14,11 @@ import java.net.http.HttpClient;
 @NoArgsConstructor
 public class ResponseDto {
 
-  private Object Data;
+    private Object Data;
 
-  private String Message;
+    private String Message;
 
-  private HttpStatus httpStatus;
+    private HttpStatus httpStatus;
 
 
 }

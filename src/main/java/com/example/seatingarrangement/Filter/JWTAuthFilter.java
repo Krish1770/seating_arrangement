@@ -1,6 +1,7 @@
 package com.example.seatingarrangement.Filter;
 
 import com.example.seatingarrangement.configuration.CompanyInfoDetailService;
+import com.example.seatingarrangement.constants.Constant;
 import com.example.seatingarrangement.entity.Session;
 import com.example.seatingarrangement.repository.service.RegistrationRepoService;
 import com.example.seatingarrangement.repository.service.SessionRepoService;
@@ -34,29 +35,29 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader= request.getHeader("Authorization");
-        String token= null;
-        String username=null;
-        if(authHeader!=null && authHeader.startsWith("Bearer")){
-            token=authHeader.substring(7);
-            username= jwtService.extractUsername(token);
-            Claims claims= jwtService.extractAllClaims(token);
-           String sessionId= claims.get("sessionId").toString();
-            Optional<Session> session= sessionRepoService.findBySessionId(sessionId);
-            if(session.get().getLogoutTime()!= null){
-                throw new BadRequestException("Already Logged Out");
+        String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String username = null;
+        if (authHeader != null && authHeader.startsWith("Bearer")) {
+            token = authHeader.substring(7);
+            username = jwtService.extractUsername(token);
+            Claims claims = jwtService.extractAllClaims(token);
+            String sessionId = claims.get("sessionId").toString();
+            Optional<Session> session = sessionRepoService.findBySessionId(sessionId);
+            if (session.get().getLogoutTime() != null) {
+                throw new BadRequestException(Constant.ALREADY_LOGGED_OUT);
             }
         }
 
 
-        if(username!=null && SecurityContextHolder.getContext().getAuthentication()==null){
-            UserDetails userDetails=companyInfoDetailService.loadUserByUsername(username);
-            if(jwtService.validateToken(token,userDetails)){
-                UsernamePasswordAuthenticationToken authenticationToken= new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = companyInfoDetailService.loadUserByUsername(username);
+            if (jwtService.validateToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }

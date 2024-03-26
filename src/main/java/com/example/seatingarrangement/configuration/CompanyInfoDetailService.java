@@ -16,9 +16,10 @@ import java.util.Optional;
 public class CompanyInfoDetailService implements UserDetailsService {
 
     private final RegistrationRepoService registrationRepoService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<CompanyDetails> companyDetails= registrationRepoService.findBycompanyName(username);
-         return companyDetails.map(CompanyInfoDetails::new).orElseThrow(()->new UsernameNotFoundException(Constant.USER_NOT_FOUND));
+        Optional<CompanyDetails> companyDetails = registrationRepoService.findBycompanyName(username);
+        return companyDetails.map(CompanyInfoDetails::new).orElseThrow(() -> new UsernameNotFoundException(Constant.USER_NOT_FOUND));
     }
 }

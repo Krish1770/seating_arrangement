@@ -11,11 +11,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableWebSecurity
 public class SeatingArrangementApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SeatingArrangementApplication.class, args);
-	}
-
-
+    public static void main(String[] args) {
+        SpringApplication.run(SeatingArrangementApplication.class, args);
+    }
 
 
 }

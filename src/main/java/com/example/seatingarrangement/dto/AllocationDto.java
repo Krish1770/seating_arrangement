@@ -13,8 +13,7 @@ import java.util.HashMap;
 public class AllocationDto {
 
     private String LayoutId;
-//    private LinkedHashMap<String,Integer> toBeAllocated;
-private HashMap<String,Integer> toBeAllocated;
+    private HashMap<String, Integer> toBeAllocated;
     private Integer preference;
 
 }

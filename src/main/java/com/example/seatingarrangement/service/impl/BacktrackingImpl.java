@@ -1,5 +1,6 @@
 package com.example.seatingarrangement.service.impl;
 
+import com.example.seatingarrangement.constants.Constant;
 import com.example.seatingarrangement.dto.*;
 import com.example.seatingarrangement.entity.Allocation;
 import com.example.seatingarrangement.entity.Team;
@@ -36,6 +37,7 @@ public class BacktrackingImpl extends AllocationAbstract {
     static int count = 0;
     static int minSteps = 100;
     static int[][] trace;
+
     @Autowired
     public BacktrackingImpl(TeamRepoService teamRepoService, CompanyRepoService companyRepositoryService, TeamRepository teamRepository, AllocationRepoService allocationRepoService, AllocationRepository allocationRepository, ModelMapper modelMapper) {
         super(teamRepoService, companyRepositoryService, teamRepository, allocationRepoService, allocationRepository, modelMapper);
@@ -80,6 +82,7 @@ public class BacktrackingImpl extends AllocationAbstract {
         }
         return totalSeating;
     }
+
     private static void findStartSeating(int totalMembers, String teamCode) {
         int wantedx = 0;
         int wantedy = 0;
@@ -192,7 +195,7 @@ public class BacktrackingImpl extends AllocationAbstract {
         int totalSpace = getLayoutDto.getAvailableSpaces();
         log.info(wantedSpace + " " + totalSpace + "                haiiiiiiiiiiiii");
         if (wantedSpace > totalSpace) {
-            throw new BadRequestException("not sufficient Spaces");
+            throw new BadRequestException(Constant.IN_SUFFICIENT_SPACE);
         }
         Allocation allocation = new Allocation();
         allocation.setAllocationId(UUID.randomUUID().toString());
@@ -226,7 +229,7 @@ public class BacktrackingImpl extends AllocationAbstract {
                         teamReferences.add(teamReference);
                     }
                     userReferenceDto.setTeamReferenceList(teamReferences);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, "already calculated", HttpStatus.OK));
+                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, Constant.ALREADY_CALCULATED, HttpStatus.OK));
                 }
             }
         } else {
@@ -277,7 +280,7 @@ public class BacktrackingImpl extends AllocationAbstract {
         userReferenceDto.setAllocation(arrangement);
         allocation.setAllocationLayout(arrangement);
         allocationRepository.save(allocation);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, "allocation saved", HttpStatus.OK));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, Constant.AlLOCATION_SAVED, HttpStatus.OK));
     }
 
     private String createTeamCode(int total) {

@@ -1,5 +1,6 @@
 package com.example.seatingarrangement.service.impl;
 
+import com.example.seatingarrangement.constants.Constant;
 import com.example.seatingarrangement.dto.CompanyDto;
 import com.example.seatingarrangement.dto.LayoutDto;
 import com.example.seatingarrangement.dto.ResponseDto;
@@ -109,11 +110,11 @@ public class CompanyServiceImpl implements CompanyService {
     Company isValid(LayoutDto layoutDto) throws BadRequestException {
         Optional<Company> company = companyRepository.findByCompanyName(layoutDto.getCompanyName());
         if (company.isEmpty())
-            throw new BadRequestException("company not present");
+            throw new BadRequestException(Constant.COMPANY_NOT_FOUND);
         if (layoutDto.getLayoutId() == null && layoutDto.getDefaultLayout() == null)
             throw new BadRequestException("data not present");
         if (layoutDto.getLayoutId() != null && companyRepoService.findByLayoutId(layoutDto.getLayoutId()) == null)
-            throw new BadRequestException("layoutId not present");
+            throw new BadRequestException(Constant.LAYOUT_NOT_FOUND);
         return company.get();
     }
 }

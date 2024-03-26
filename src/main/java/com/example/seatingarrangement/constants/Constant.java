@@ -1,5 +1,7 @@
 package com.example.seatingarrangement.constants;
 
+import javax.swing.plaf.PanelUI;
+
 public  class Constant {
 
 
@@ -21,5 +23,17 @@ public  class Constant {
     public static final String REGISTER_SUCCESSFULLY= "Register Successfully";
 
     public static final String LOGIN_SUCCESSFULLY= "Login successful";
+
+    public static final String ALLOCATION_NOT_RETRIEVED= "allocation retrieved";
+    public static final String ALLOCATION_NOT_FOUND="no allocation for the given id";
+
+    public static final String FILE_CONVERTED= "file converted";
+    public static final String FILE_NOT_CONVERTED="file not converted . null column found";
+    public static final String IN_SUFFICIENT_SPACE= "not sufficient Spaces";
+
+    public static  final String ALREADY_CALCULATED= "already calculated";
+
+    public static final String AlLOCATION_SAVED= "allocation saved";
+    public static final String ALLOCATION_CREATED= "allocation created";
 
 }

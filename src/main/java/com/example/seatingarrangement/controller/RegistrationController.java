@@ -17,6 +17,7 @@ public class RegistrationController implements RegistrationAPI {
 
     private final RegistrationService registrationService;
     private final JWTService jwtService;
+
     @Override
     public ResponseEntity<ResponseDto> register(SignUpRequestDTO signUpRequestDTO) {
         CompanyDetails companyDetails = registrationService.register(signUpRequestDTO);
@@ -34,7 +35,7 @@ public class RegistrationController implements RegistrationAPI {
     @Override
     public ResponseEntity<ResponseDto> logout(TokenDto tokenDto) {
 
-    return registrationService.logout(tokenDto);
+        return registrationService.logout(tokenDto);
 
 
     }
