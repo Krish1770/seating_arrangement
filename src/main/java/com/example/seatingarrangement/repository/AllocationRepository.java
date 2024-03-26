@@ -17,6 +17,7 @@ public interface AllocationRepository extends MongoRepository<Allocation,String>
 
     @Aggregation({
             "{$match: {defaultLayoutId: '?0'}}",
+            "{$sort: {allocationType: 1}}",
             "{$group: {_id: '$teamId', allocationDataList: {$push: '$$ROOT'}}}",
             "{$lookup: {from: 'Team', localField: '_id', foreignField: 'teamId', as: 'teamData'}}",
             "{$unwind: '$teamData'}",

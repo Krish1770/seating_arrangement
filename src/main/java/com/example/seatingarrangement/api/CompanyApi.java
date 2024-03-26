@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("Layout")
-@CrossOrigin
+@CrossOrigin()
 public interface CompanyApi {
     @GetMapping("{companyName}")  // query to be added
     ResponseEntity<ResponseDto> getAllLayOut(@PathVariable String companyName);

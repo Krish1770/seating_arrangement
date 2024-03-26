@@ -36,27 +36,6 @@ public class BacktrackingImpl extends AllocationAbstract {
     static int count = 0;
     static int minSteps = 100;
     static int[][] trace;
-
-
-//    @Autowired
-//    CompanyRepoService companyRepositoryService;
-
-//    @Autowired
-//    private TeamRepoService teamRepositoryService;
-
-//    @Autowired
-//    private AllocationRepository allocationRepository;
-
-//    @Autowired
-//    private AllocationRepoService allocationRepositoryService;
-
-//    @Autowired
-//    private CompanyRepository companyRepository;
-//    @Autowired
-//    ModelMapper modelMapper;
-
-    //    @Autowired
-//    private TeamRepository teamRepository;
     @Autowired
     public BacktrackingImpl(TeamRepoService teamRepoService, CompanyRepoService companyRepositoryService, TeamRepository teamRepository, AllocationRepoService allocationRepoService, AllocationRepository allocationRepository, ModelMapper modelMapper) {
         super(teamRepoService, companyRepositoryService, teamRepository, allocationRepoService, allocationRepository, modelMapper);
@@ -65,11 +44,6 @@ public class BacktrackingImpl extends AllocationAbstract {
     private static void findArrangement(List<TeamInfo> teamList) {
         track = new boolean[tempLayout.length][tempLayout[0].length];
         totalSeating = findTotalSeating(tempLayout);
-//        for (int i = 0; i < totalSeating.length; i++) {
-//            for (int j = 0; j < totalSeating[0].length; j++)
-//                System.out.print(totalSeating[i][j] + " ");
-//            System.out.println();
-//        }
         for (TeamInfo team : teamList) {
             lastx = -1;
             lasty = -1;
@@ -106,7 +80,6 @@ public class BacktrackingImpl extends AllocationAbstract {
         }
         return totalSeating;
     }
-
     private static void findStartSeating(int totalMembers, String teamCode) {
         int wantedx = 0;
         int wantedy = 0;
@@ -217,7 +190,7 @@ public class BacktrackingImpl extends AllocationAbstract {
             wantedSpace += teamList.getTeamCount();
         GetLayoutDto getLayoutDto = companyRepoService.findByLayoutId(teamObjectDto.getLayoutId());
         int totalSpace = getLayoutDto.getAvailableSpaces();
-        System.out.println(wantedSpace + " " + totalSpace + "                haiiiiiiiiiiiii");
+        log.info(wantedSpace + " " + totalSpace + "                haiiiiiiiiiiiii");
         if (wantedSpace > totalSpace) {
             throw new BadRequestException("not sufficient Spaces");
         }
@@ -238,7 +211,7 @@ public class BacktrackingImpl extends AllocationAbstract {
 
 
                 Optional<Allocation> allocatedLayout = allocationRepoService.findByDefaultLayoutIdAndAllocationTypeAndAllocationPreference(teamObjectDto.getLayoutId(), type, teamObjectDto.getAlgorithmPref());
-                System.out.println(allocatedLayout);
+                log.info(allocatedLayout.toString());
                 if (allocatedLayout.isPresent()) {
                     UserReferenceDto userReferenceDto = new UserReferenceDto();
 
@@ -254,7 +227,6 @@ public class BacktrackingImpl extends AllocationAbstract {
                     }
                     userReferenceDto.setTeamReferenceList(teamReferences);
                     return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, "already calculated", HttpStatus.OK));
-//                    throw new BadRequestException("already Selected");
                 }
             }
         } else {
@@ -285,7 +257,8 @@ public class BacktrackingImpl extends AllocationAbstract {
             teamList.sort(Comparator.comparing(TeamInfo::getTeamCount));
         } else {
             allocation.setAllocationType(Type.RANDOM);
-            teamList = new HashSet<>(teamList).stream().toList();
+            Collections.shuffle(teamList);
+//            teamList = new HashSet<>(teamList).stream().toList();
         }
         log.info(teamList.toString());
         int[][] defaultLayout = getLayoutDto.getLayout();
@@ -294,10 +267,6 @@ public class BacktrackingImpl extends AllocationAbstract {
         findArrangement(teamList);
         UserReferenceDto userReferenceDto = new UserReferenceDto();
         List<UserReferenceDto.TeamReference> teams = new ArrayList<>();
-//                    teamList.stream().map(a ->
-//                            modelMapper.map(a, UserReferenceDto.TeamReference.class)
-//                    )
-//                    .toList();
         for (TeamInfo teamInfo : teamList) {
             UserReferenceDto.TeamReference teamReference = new UserReferenceDto.TeamReference();
             modelMapper.map(teamInfo, teamReference);
@@ -307,11 +276,6 @@ public class BacktrackingImpl extends AllocationAbstract {
         userReferenceDto.setTeamReferenceList(teams);
         userReferenceDto.setAllocation(arrangement);
         allocation.setAllocationLayout(arrangement);
-//        for (int i = 0; i < arrangement.length; i++) {
-//            for (int j = 0; j < arrangement[0].length; j++)
-//                System.out.print(arrangement[i][j] + " ");
-//            System.out.println();
-//        }
         allocationRepository.save(allocation);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(userReferenceDto, "allocation saved", HttpStatus.OK));
     }
