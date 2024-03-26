@@ -1,12 +1,17 @@
 package com.example.seatingarrangement.Filter;
 
 import com.example.seatingarrangement.configuration.CompanyInfoDetailService;
+import com.example.seatingarrangement.entity.Session;
+import com.example.seatingarrangement.repository.service.RegistrationRepoService;
+import com.example.seatingarrangement.repository.service.SessionRepoService;
 import com.example.seatingarrangement.service.JWTService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,13 +20,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class JWTAuthFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final CompanyInfoDetailService companyInfoDetailService;
-
+    private final SessionRepoService sessionRepoService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,7 +40,14 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         if(authHeader!=null && authHeader.startsWith("Bearer")){
             token=authHeader.substring(7);
             username= jwtService.extractUsername(token);
+            Claims claims= jwtService.extractAllClaims(token);
+           String sessionId= claims.get("sessionId").toString();
+            Optional<Session> session= sessionRepoService.findBySessionId(sessionId);
+            if(session.get().getLogoutTime()!= null){
+                throw new BadRequestException("Already Logged Out");
+            }
         }
+
 
         if(username!=null && SecurityContextHolder.getContext().getAuthentication()==null){
             UserDetails userDetails=companyInfoDetailService.loadUserByUsername(username);

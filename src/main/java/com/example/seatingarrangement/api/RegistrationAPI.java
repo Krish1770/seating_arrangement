@@ -17,7 +17,7 @@ public interface RegistrationAPI {
     public ResponseEntity<ResponseDto> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO);
 
     @PostMapping(value = "${companyLogout}")
-    public ResponseEntity<ResponseDto> logout(@Valid @RequestParam String accessToken);
+    public ResponseEntity<ResponseDto> logout(@RequestBody TokenDto tokenDto);
 
 }
 

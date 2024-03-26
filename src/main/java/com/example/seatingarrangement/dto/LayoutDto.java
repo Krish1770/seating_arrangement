@@ -1,8 +1,6 @@
 package com.example.seatingarrangement.dto;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 //@Getter

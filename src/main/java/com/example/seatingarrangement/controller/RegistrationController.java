@@ -1,6 +1,7 @@
 package com.example.seatingarrangement.controller;
 
 import com.example.seatingarrangement.api.RegistrationAPI;
+import com.example.seatingarrangement.constants.Constant;
 import com.example.seatingarrangement.dto.*;
 import com.example.seatingarrangement.entity.CompanyDetails;
 import com.example.seatingarrangement.service.JWTService;
@@ -19,21 +20,21 @@ public class RegistrationController implements RegistrationAPI {
     @Override
     public ResponseEntity<ResponseDto> register(SignUpRequestDTO signUpRequestDTO) {
         CompanyDetails companyDetails = registrationService.register(signUpRequestDTO);
-        return ResponseEntity.ok().body(new ResponseDto(companyDetails, "Register Successfully", HttpStatus.OK));
+        return ResponseEntity.ok().body(new ResponseDto(companyDetails, Constant.REGISTER_SUCCESSFULLY, HttpStatus.OK));
     }
 
     @Override
     public ResponseEntity<ResponseDto> login(LoginRequestDTO loginRequestDTO) {
 
         LoginResponseDTO login = registrationService.login(loginRequestDTO);
-        return ResponseEntity.ok().body(new ResponseDto(login, "Login successful", HttpStatus.OK));
+        return ResponseEntity.ok().body(new ResponseDto(login, Constant.LOGIN_SUCCESSFULLY, HttpStatus.OK));
     }
 
 
     @Override
-    public ResponseEntity<ResponseDto> logout(String accessToken) {
+    public ResponseEntity<ResponseDto> logout(TokenDto tokenDto) {
 
-    return registrationService.logout(accessToken);
+    return registrationService.logout(tokenDto);
 
 
     }

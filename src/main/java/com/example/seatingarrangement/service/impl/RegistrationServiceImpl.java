@@ -1,5 +1,6 @@
 package com.example.seatingarrangement.service.impl;
 
+import com.example.seatingarrangement.constants.Constant;
 import com.example.seatingarrangement.dto.*;
 import com.example.seatingarrangement.entity.CompanyDetails;
 import com.example.seatingarrangement.entity.Session;
@@ -18,6 +19,7 @@ import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecu
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,12 +42,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         if(companyDetails.isPresent()){
 
                 if(companyDetails.get().getCompanyName().equals(signUpRequestDTO.getCompanyName()) && companyDetails.get().getEmail().equals(signUpRequestDTO.getEmail())){
-                    throw new DuplicateRegistrationException("Company name and email already exist.");
+                    throw new DuplicateRegistrationException(Constant.COMPANY_NAME_EMAIL_EXITS);
                 } else if (companyDetails.get().getCompanyName().equals(signUpRequestDTO.getCompanyName())) {
 
-                    throw new DuplicateRegistrationException("Company name already exists.");
+                    throw new DuplicateRegistrationException(Constant.COMPANY_NAME_EXITS);
                 } else if (companyDetails.get().getEmail().equals(signUpRequestDTO.getEmail())) {
-                    throw new DuplicateRegistrationException("Email already exists.");
+                    throw new DuplicateRegistrationException(Constant.COMPANY_EMAIL_EXITS);
                 }
         }
         CompanyDetails companyInfo =  modelMapper.map(signUpRequestDTO, CompanyDetails.class);
@@ -58,7 +60,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 
             Optional<CompanyDetails> companyDetails= registrationRepoService.findByEmail(loginRequestDTO.getEmailid());
-
+   if(companyDetails.isEmpty())
+   {
+       throw  new UserNotFoundException(Constant.USER_NOT_FOUND);
+   }
         String encodedPasswordFromRequest = passwordEncoder.encode(loginRequestDTO.getPassword());
 
         if(passwordEncoder.matches(loginRequestDTO.getPassword(), companyDetails.get().getPassword())){
@@ -82,11 +87,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
            } else if (loginRequestDTO.getPassword()!= companyDetails.get().getPassword()) {
-               throw new  IncorrectPasswordException("Incorrect password");
+               throw new  IncorrectPasswordException(Constant.INCORRECT_PASSWORD);
 
            }
            else{
-               throw new UserNotFoundException("User not found");
+               throw new UserNotFoundException(Constant.USER_NOT_FOUND);
 
 
            }
@@ -94,15 +99,18 @@ public class RegistrationServiceImpl implements RegistrationService {
            }
 
     @Override
-    public ResponseEntity<ResponseDto> logout(String accessToken) {
+    public ResponseEntity<ResponseDto> logout(TokenDto tokenDto) {
         try{
+            String accessToken = tokenDto.getAccessToken();
             Claims claims= jwtService.extractAllClaims(accessToken);
+            claims.setExpiration(new Date());
+            System.out.println(claims);
             String sessionId= claims.get("sessionId", String.class);
             Optional<Session> sessionData= sessionRepoService.findBySessionId(sessionId);
             Session session = sessionData.get();
             System.out.println(session.getLogoutTime());
             if(session.getLogoutTime() != null){
-                throw new AlreadyLogOutException("Already Logged Out");
+                throw new AlreadyLogOutException(Constant.ALREADY_LOGGED_OUT);
             }
             session.setLogoutTime(LocalDateTime.now());
             sessionRepoService.save(session);
@@ -110,7 +118,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             return ResponseEntity.ok().body(new ResponseDto(null,"Logged Out",HttpStatus.OK));
         }
         catch (Exception e){
-            throw new ResourceNotFoundException("Invalid Token ");
+            throw new ResourceNotFoundException(Constant.INVALID_TOKEN);
         }
     }
 

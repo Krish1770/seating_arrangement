@@ -4,7 +4,6 @@ import com.example.seatingarrangement.api.CompanyApi;
 import com.example.seatingarrangement.dto.CompanyDto;
 import com.example.seatingarrangement.dto.LayoutDto;
 import com.example.seatingarrangement.dto.ResponseDto;
-import com.example.seatingarrangement.repository.CompanyRepository;
 import com.example.seatingarrangement.service.CompanyService;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;

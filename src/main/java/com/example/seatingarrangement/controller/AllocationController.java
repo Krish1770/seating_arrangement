@@ -1,7 +1,9 @@
 package com.example.seatingarrangement.controller;
 
 import com.example.seatingarrangement.api.AllocationApi;
-import com.example.seatingarrangement.dto.*;
+import com.example.seatingarrangement.dto.CsvOutputDto;
+import com.example.seatingarrangement.dto.ResponseDto;
+import com.example.seatingarrangement.dto.TeamObjectDto;
 import com.example.seatingarrangement.service.AllocationService;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
