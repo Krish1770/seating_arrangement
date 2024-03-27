@@ -135,7 +135,6 @@ public class BacktrackingImpl extends AllocationAbstract {
     }
 
     static boolean findSteps(int x, int y, int resultx, int resulty, int steps, String teamCode) {
-//        log.
         if (x == resultx && y == resulty) {
             steps += 1;
             if (steps < minSteps)
@@ -261,7 +260,6 @@ public class BacktrackingImpl extends AllocationAbstract {
         } else {
             allocation.setAllocationType(Type.RANDOM);
             Collections.shuffle(teamList);
-//            teamList = new HashSet<>(teamList).stream().toList();
         }
         log.info(teamList.toString());
         int[][] defaultLayout = getLayoutDto.getLayout();
